@@ -35,7 +35,7 @@ app.get('/api/:barcode', async (req, res) => {
 
 // Health check endpoint
 app.get('/health', (req, res) => {
-    res.send('Proxy server is up and running!');
+    res.send('Ja, Proxy Server still working for you!');
 });
 
 app.listen(3000, () => {
