@@ -44,6 +44,8 @@ app.get('/health', (req, res) => {
     res.send('I, Proxy Server, am still staying to watch for your safety!');
 });
 
-app.listen(3000, () => {
-    console.log('Proxy running on port 3000');
+// Uruchomienie serwera na porcie 3000 lub zmiennej środowiskowej PORT
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Proxy running on port ${PORT}`);
 });
