@@ -21,7 +21,7 @@ app.use((req, res, next) => {
 
 app.get('/api/:barcode', async (req, res) => {
     try {
-        const { barcode } = req.params; // Pobierz kod kreskowy z parametru URL
+        const { barcode } = req.params;
         const apiUrl = `https://world.openfoodfacts.org/api/v0/product/${barcode}.json`;
         console.log(`Fetching from API: ${apiUrl}`);
         const response = await axios.get(apiUrl);
