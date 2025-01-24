@@ -3,24 +3,31 @@ const { createProxyMiddleware } = require('http-proxy-middleware');
 
 const app = express();
 
-const primaryTarget = 'https://world.openfoodfacts.org';
-const secondaryTarget = 'https://ssl-api.openfoodfacts.org';
+const corsOptions = {
+    origin: 'https://www-servicesdim-com.filesusr.com',
+    methods: 'GET, OPTIONS',
+    allowedHeaders: 'Content-Type'
+};
 
-const apiProxy = createProxyMiddleware({
-  target: primaryTarget,
-  changeOrigin: true,
-  onError: (err, req, res, target) => {
-    console.error(`Proxy error with ${target}:`, err);
-    if (target === primaryTarget) {
-      // Fallback to secondary target
-      apiProxy.target = secondaryTarget;
-      console.log(`Switching to secondary target: ${secondaryTarget}`);
+// Middleware do ustawiania nagłówków CORS
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', corsOptions.origin);
+    res.header('Access-Control-Allow-Methods', corsOptions.methods);
+    res.header('Access-Control-Allow-Headers', corsOptions.allowedHeaders);
+    if (req.method === 'OPTIONS') {
+        return res.status(200).end();
     }
-    res.status(500).send('Proxy error');
-  }
+    next();
 });
 
-app.use('/api', apiProxy);
+app.use('/api', createProxyMiddleware({
+  target: 'https://world.openfoodfacts.org',
+  changeOrigin: true,
+  onError: (err, req, res) => {
+    console.error('Proxy error:', err);
+    res.status(500).send('Proxy error');
+  }
+}));
 
 app.listen(3000, () => {
   console.log('Proxy running on port 3000');
