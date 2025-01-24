@@ -8,7 +8,7 @@ const corsOptions = {
     allowedHeaders: 'Content-Type'
 };
 
-// Middleware do ustawiania nagłówków CORS
+// Middleware to set CORS headers
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', corsOptions.origin);
     res.setHeader('Access-Control-Allow-Methods', corsOptions.methods);
@@ -33,7 +33,7 @@ app.get('/api/:barcode', async (req, res) => {
     }
 });
 
-// Dodaj prosty endpoint do sprawdzenia działania serwera proxy
+// Health check endpoint
 app.get('/health', (req, res) => {
     res.send('Proxy server is up and running!');
 });
