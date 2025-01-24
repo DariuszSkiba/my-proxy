@@ -3,16 +3,16 @@ const axios = require('axios');
 const app = express();
 
 const corsOptions = {
-    origin: 'https://www-servicesdim-com.filesusr.com',
+    origin: 'https://www-servicesdim-com.filesusr.com', // Zmienna domena, z której chcesz uzyskać dostęp
     methods: 'GET, OPTIONS',
     allowedHeaders: 'Content-Type'
 };
 
 // Middleware do ustawiania nagłówków CORS
 app.use((req, res, next) => {
-    res.header('Access-Control-Allow-Origin', corsOptions.origin);
-    res.header('Access-Control-Allow-Methods', corsOptions.methods);
-    res.header('Access-Control-Allow-Headers', corsOptions.allowedHeaders);
+    res.setHeader('Access-Control-Allow-Origin', corsOptions.origin);
+    res.setHeader('Access-Control-Allow-Methods', corsOptions.methods);
+    res.setHeader('Access-Control-Allow-Headers', corsOptions.allowedHeaders);
     if (req.method === 'OPTIONS') {
         return res.status(200).end();
     }
@@ -21,8 +21,9 @@ app.use((req, res, next) => {
 
 app.get('/api/*', async (req, res) => {
     try {
-        const apiUrl = req.originalUrl.replace('/api/', ''); // Wyodrębnij właściwy URL
+        const apiUrl = req.params[0]; // Pobierz URL po "/api/"
         const response = await axios.get(`https://world.openfoodfacts.org/api/v0/product/${apiUrl}.json`);
+        res.setHeader('Access-Control-Allow-Origin', corsOptions.origin); // Ustaw nagłówek CORS dla odpowiedzi
         res.send(response.data);
     } catch (error) {
         console.error('Proxy error:', error);
