@@ -26,10 +26,10 @@ app.get('/api/:barcode', async (req, res) => {
         console.log(`Fetching from API: ${apiUrl}`);
         const response = await axios.get(apiUrl);
         res.setHeader('Access-Control-Allow-Origin', corsOptions.origin);
-        res.send(response.data);
+        res.json(response.data); // Ensure the response is JSON
     } catch (error) {
         console.error('Proxy error:', error);
-        res.status(500).send('Proxy error');
+        res.status(500).json({ error: 'Proxy error' }); // Return JSON error response
     }
 });
 
