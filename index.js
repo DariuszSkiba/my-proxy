@@ -3,7 +3,7 @@ const axios = require('axios');
 const app = express();
 
 const corsOptions = {
-    origin: 'https://www-servicesdim-com.filesusr.com', // Zmienna domena, z której chcesz uzyskać dostęp
+    origin: '*',
     methods: 'GET, OPTIONS',
     allowedHeaders: 'Content-Type'
 };
@@ -19,11 +19,13 @@ app.use((req, res, next) => {
     next();
 });
 
-app.get('/api/*', async (req, res) => {
+app.get('/api/:barcode', async (req, res) => {
     try {
-        const apiUrl = req.params[0]; // Pobierz URL po "/api/"
-        const response = await axios.get(`https://world.openfoodfacts.org/api/v0/product/${apiUrl}.json`);
-        res.setHeader('Access-Control-Allow-Origin', corsOptions.origin); // Ustaw nagłówek CORS dla odpowiedzi
+        const { barcode } = req.params; // Pobierz kod kreskowy z parametru URL
+        const apiUrl = `https://world.openfoodfacts.org/api/v0/product/${barcode}.json`;
+        console.log(`Fetching from API: ${apiUrl}`);
+        const response = await axios.get(apiUrl);
+        res.setHeader('Access-Control-Allow-Origin', corsOptions.origin);
         res.send(response.data);
     } catch (error) {
         console.error('Proxy error:', error);
