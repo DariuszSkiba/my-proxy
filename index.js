@@ -33,6 +33,11 @@ app.get('/api/:barcode', async (req, res) => {
     }
 });
 
+// Dodaj prosty endpoint do sprawdzenia działania serwera proxy
+app.get('/health', (req, res) => {
+    res.send('Proxy server is up and running!');
+});
+
 app.listen(3000, () => {
     console.log('Proxy running on port 3000');
 });
