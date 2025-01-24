@@ -4,7 +4,7 @@ const app = express();
 
 const corsOptions = {
     origin: '*',
-    methods: 'GET, OPTIONS',
+    methods: 'GET, POST, OPTIONS',
     allowedHeaders: 'Content-Type'
 };
 
@@ -37,6 +37,22 @@ app.get('/api/:barcode', async (req, res) => {
         console.error('Proxy error:', error);
         res.status(500).json({ error: 'Proxy error' }); // Return JSON error response
     }
+});
+
+// Endpoint do przetwarzania raportów CSP
+app.post('/csp-report', express.json({ type: 'application/csp-report' }), (req, res) => {
+    const report = req.body;
+    console.log('Received CSP Report:', report);
+
+    axios.post('https://accounts.google.com/_/IdpIFrameHttp/cspreport/fine-allowlist', report)
+        .then(response => {
+            console.log('CSP Report sent successfully:', response.data);
+            res.status(200).end();
+        })
+        .catch(error => {
+            console.error('Error sending CSP Report:', error);
+            res.status(400).json({ error: 'Error sending CSP Report' });
+        });
 });
 
 // Health check endpoint
