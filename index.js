@@ -1,6 +1,5 @@
 const express = require('express');
-const { createProxyMiddleware } = require('http-proxy-middleware');
-
+const axios = require('axios');
 const app = express();
 
 const corsOptions = {
@@ -20,15 +19,17 @@ app.use((req, res, next) => {
     next();
 });
 
-app.use('/api', createProxyMiddleware({
-  target: 'https://world.openfoodfacts.org',
-  changeOrigin: true,
-  onError: (err, req, res) => {
-    console.error('Proxy error:', err);
-    res.status(500).send('Proxy error');
-  }
-}));
+app.get('/api/*', async (req, res) => {
+    try {
+        const apiUrl = req.originalUrl.replace('/api/', ''); // Wyodrębnij właściwy URL
+        const response = await axios.get(`https://world.openfoodfacts.org/api/v0/product/${apiUrl}.json`);
+        res.send(response.data);
+    } catch (error) {
+        console.error('Proxy error:', error);
+        res.status(500).send('Proxy error');
+    }
+});
 
 app.listen(3000, () => {
-  console.log('Proxy running on port 3000');
+    console.log('Proxy running on port 3000');
 });
