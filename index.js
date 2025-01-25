@@ -22,23 +22,18 @@ app.use((req, res, next) => {
 
 app.use(express.json()); // Middleware do parsowania JSON request bodies
 
-// Endpointy
-app.post('/api/submit-data', async (req, res) => {
-    const dataToSend = req.body.values;
+// Endpoint do uzyskiwania informacji o produkcie
+app.get('/api/:barcode', async (req, res) => {
     try {
-        const response = await axios.post(
-            `https://sheets.googleapis.com/v4/spreadsheets/${process.env.SPREADSHEET_ID}/values/scaned_products!A:F:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`,
-            { values: dataToSend },
-            {
-                headers: {
-					                'Authorization': `Bearer ${process.env.REFRESH_TOKEN}`,
-                'Content-Type': 'application/json'
-            }
-        );
-        res.status(200).json({ message: 'Data submitted successfully!', response: response.data });
+        const { barcode } = req.params;
+        const apiUrl = `https://world.openfoodfacts.org/api/v0/product/${barcode}.json`;
+        console.log(`Fetching from API: ${apiUrl}`);
+        const response = await axios.get(apiUrl);
+                res.setHeader('Access-Control-Allow-Origin', corsOptions.origin);
+        res.json(response.data); // Ensure the response is JSON
     } catch (error) {
-        console.error('Error submitting data:', error);
-        res.status(500).json({ error: 'Error submitting data.' });
+        console.error('Proxy error:', error);
+        res.status(500).json({ error: 'Proxy error' }); // Return JSON error response
     }
 });
 
@@ -62,18 +57,24 @@ app.post('/csp-report', express.json({ type: 'application/csp-report' }), (req, 
     });
 });
 
-// Endpoint do uzyskiwania informacji o produkcie
-app.get('/api/:barcode', async (req, res) => {
+// Endpoint do przesyłania danych do Google Sheets
+app.post('/api/submit-data', async (req, res) => {
+    const dataToSend = req.body.values;
     try {
-        const { barcode } = req.params;
-        const apiUrl = `https://world.openfoodfacts.org/api/v0/product/${barcode}.json`;
-        console.log(`Fetching from API: ${apiUrl}`);
-        const response = await axios.get(apiUrl);
-        res.setHeader('Access-Control-Allow-Origin', corsOptions.origin);
-        res.json(response.data); // Ensure the response is JSON
+        const response = await axios.post(
+            `https://sheets.googleapis.com/v4/spreadsheets/${process.env.SPREADSHEET_ID}/values/scaned_products!A:F:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`,
+            { values: dataToSend },
+            {
+                headers: {
+                    'Authorization': `Bearer ${process.env.REFRESH_TOKEN}`,
+                    'Content-Type': 'application/json'
+                }
+            }
+        );
+        res.status(200).json({ message: 'Data submitted successfully!', response: response.data });
     } catch (error) {
-        console.error('Proxy error:', error);
-        res.status(500).json({ error: 'Proxy error' }); // Return JSON error response
+        console.error('Error submitting data:', error);
+        res.status(500).json({ error: 'Error submitting data.' });
     }
 });
 
