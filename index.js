@@ -29,7 +29,7 @@ app.get('/api/:barcode', async (req, res) => {
         const apiUrl = `https://world.openfoodfacts.org/api/v0/product/${barcode}.json`;
         console.log(`Fetching from API: ${apiUrl}`);
         const response = await axios.get(apiUrl);
-                res.setHeader('Access-Control-Allow-Origin', corsOptions.origin);
+        res.setHeader('Access-Control-Allow-Origin', corsOptions.origin);
         res.json(response.data); // Ensure the response is JSON
     } catch (error) {
         console.error('Proxy error:', error);
@@ -60,6 +60,10 @@ app.post('/csp-report', express.json({ type: 'application/csp-report' }), (req, 
 // Endpoint do przesyłania danych do Google Sheets
 app.post('/api/submit-data', async (req, res) => {
     const dataToSend = req.body.values;
+    console.log("Received data to submit:", dataToSend); // Logowanie danych
+    console.log("CLIENT_ID:", process.env.CLIENT_ID); // Logowanie CLIENT_ID
+    console.log("SPREADSHEET_ID:", process.env.SPREADSHEET_ID); // Logowanie SPREADSHEET_ID
+
     try {
         const response = await axios.post(
             `https://sheets.googleapis.com/v4/spreadsheets/${process.env.SPREADSHEET_ID}/values/scaned_products!A:F:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`,
@@ -71,9 +75,10 @@ app.post('/api/submit-data', async (req, res) => {
                 }
             }
         );
+        console.log("Data submitted successfully:", response.data); // Logowanie odpowiedzi
         res.status(200).json({ message: 'Data submitted successfully!', response: response.data });
     } catch (error) {
-        console.error('Error submitting data:', error);
+        console.error('Error submitting data:', error.response ? error.response.data : error.message); // Logowanie błędu
         res.status(500).json({ error: 'Error submitting data.' });
     }
 });
