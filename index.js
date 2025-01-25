@@ -2,6 +2,12 @@ const express = require('express');
 const axios = require('axios');
 const app = express();
 
+// Wczytywanie zmiennych środowiskowych
+const CLIENT_ID = process.env.CLIENT_ID;
+const CLIENT_SECRET = process.env.CLIENT_SECRET;
+const REFRESH_TOKEN = process.env.REFRESH_TOKEN;
+const TOKEN_URI = process.env.TOKEN_URI;
+
 const corsOptions = {
     origin: '*',
     methods: 'GET, POST, OPTIONS',
@@ -44,15 +50,19 @@ app.post('/csp-report', express.json({ type: 'application/csp-report' }), (req, 
     const report = req.body;
     console.log('Received CSP Report:', report);
 
-    axios.post('https://accounts.google.com/_/IdpIFrameHttp/cspreport/fine-allowlist', report)
-        .then(response => {
-            console.log('CSP Report sent successfully:', response.data);
-            res.status(200).end();
-        })
-        .catch(error => {
-            console.error('Error sending CSP Report:', error);
-            res.status(400).json({ error: 'Error sending CSP Report' });
-        });
+    axios.post(TOKEN_URI, report, {
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => {
+        console.log('CSP Report sent successfully:', response.data);
+        res.status(200).end();
+    })
+    .catch(error => {
+        console.error('Error sending CSP Report:', error);
+        res.status(400).json({ error: 'Error sending CSP Report' });
+    });
 });
 
 // Health check endpoint
