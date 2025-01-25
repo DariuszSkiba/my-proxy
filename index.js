@@ -63,6 +63,7 @@ app.post('/api/submit-data', async (req, res) => {
     console.log("Received data to submit:", dataToSend); // Logowanie danych
     console.log("CLIENT_ID:", process.env.CLIENT_ID); // Logowanie CLIENT_ID
     console.log("SPREADSHEET_ID:", process.env.SPREADSHEET_ID); // Logowanie SPREADSHEET_ID
+    console.log("REFRESH_TOKEN:", process.env.REFRESH_TOKEN); // Dodajmy logowanie REFRESH_TOKEN (bezpieczne do celów diagnostycznych)
 
     try {
         const response = await axios.post(
@@ -70,7 +71,7 @@ app.post('/api/submit-data', async (req, res) => {
             { values: dataToSend },
             {
                 headers: {
-                    'Authorization': `Bearer ${process.env.REFRESH_TOKEN}`,
+                    'Authorization': `Bearer ${process.env.ACCESS_TOKEN}`, // Użycie ACCESS_TOKEN jako nagłówka autoryzacji
                     'Content-Type': 'application/json'
                 }
             }
