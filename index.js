@@ -1,3 +1,5 @@
+require('dotenv').config(); // Wczytaj zmienne środowiskowe z pliku .env
+
 const express = require('express');
 const axios = require('axios');
 const app = express();
