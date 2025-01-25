@@ -9,6 +9,7 @@ const CLIENT_ID = process.env.CLIENT_ID;
 const CLIENT_SECRET = process.env.CLIENT_SECRET;
 const REFRESH_TOKEN = process.env.REFRESH_TOKEN;
 const TOKEN_URI = process.env.TOKEN_URI;
+const SPREADSHEET_ID = process.env.SPREADSHEET_ID;
 
 const corsOptions = {
     origin: '*',
@@ -65,6 +66,27 @@ app.post('/csp-report', express.json({ type: 'application/csp-report' }), (req, 
         console.error('Error sending CSP Report:', error);
         res.status(400).json({ error: 'Error sending CSP Report' });
     });
+});
+
+// Endpoint do przesyłania danych do Google Sheets
+app.post('/api/submit-data', express.json(), async (req, res) => {
+    const dataToSend = req.body.values; // Złożona struktura danych
+    try {
+        const response = await axios.post(
+            `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/scaned_products!A:F:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`,
+            { values: dataToSend },
+            {
+                headers: {
+                    'Authorization': `Bearer ${REFRESH_TOKEN}`,
+                    'Content-Type': 'application/json'
+                }
+            }
+        );
+        res.status(200).json({ message: 'Data submitted successfully!', response: response.data });
+    } catch (error) {
+        console.error('Error submitting data:', error);
+        res.status(500).json({ error: 'Error submitting data.' });
+    }
 });
 
 // Health check endpoint
