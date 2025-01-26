@@ -51,7 +51,7 @@ async function refreshAccessToken() {
 // Endpoint do przesyłania danych do Google Sheets
 app.post('/api/submit-data', async (req, res) => {
     const dataToSend = req.body.values;
-    console.log("Received data to submit:", dataToSend);
+    console.log("Received data to submit:", JSON.stringify(dataToSend, null, 2)); // Logowanie danych przed wysłaniem
     console.log("CLIENT_ID:", process.env.CLIENT_ID);
     console.log("SPREADSHEET_ID:", process.env.SPREADSHEET_ID);
 
@@ -59,7 +59,7 @@ app.post('/api/submit-data', async (req, res) => {
         const accessToken = await refreshAccessToken();
         console.log("Access Token:", accessToken); // Logowanie tokenu dostępu
         const response = await axios.post(
-            `https://sheets.googleapis.com/v4/spreadsheets/${process.env.SPREADSHEET_ID}/values/products!A:J:append?valueInputOption=USER_ENTERED&insertDataOption=OVERWRITE`,
+            `https://sheets.googleapis.com/v4/spreadsheets/${process.env.SPREADSHEET_ID}/values/products!A:J:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`,
             { values: dataToSend },
             {
                 headers: {
