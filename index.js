@@ -24,14 +24,20 @@ app.use(express.json()); // Middleware do parsowania JSON request bodies
 
 // Funkcja do odświeżenia tokenu dostępu
 async function refreshAccessToken() {
-    const response = await axios.post(process.env.TOKEN_URI, {
-        client_id: process.env.CLIENT_ID,
-        client_secret: process.env.CLIENT_SECRET,
-        refresh_token: process.env.REFRESH_TOKEN,
-        grant_type: 'refresh_token',
-    });
-    return response.data.access_token;
+    try {
+        const response = await axios.post(process.env.TOKEN_URI, {
+            client_id: process.env.CLIENT_ID,
+            client_secret: process.env.CLIENT_SECRET,
+            refresh_token: process.env.REFRESH_TOKEN,
+            grant_type: 'refresh_token',
+        });
+        return response.data.access_token;
+    } catch (error) {
+        console.error('Error refreshing access token:', error.response ? error.response.data : error.message);
+        throw new Error('Failed to refresh access token');
+    }
 }
+
 
 // Endpoint do przesyłania danych do Google Sheets
 app.post('/api/submit-data', async (req, res) => {
