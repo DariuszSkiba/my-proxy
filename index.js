@@ -49,6 +49,7 @@ async function refreshAccessToken() {
 }
 
 
+
 // Endpoint do przesyłania danych do Google Sheets
 app.post('/api/submit-data', async (req, res) => {
     const dataToSend = req.body.values;
