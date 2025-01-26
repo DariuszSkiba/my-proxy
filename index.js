@@ -53,29 +53,31 @@ async function refreshAccessToken() {
 // Endpoint do przesyłania danych do Google Sheets
 app.post('/api/submit-data', async (req, res) => {
     const dataToSend = req.body.values;
-    console.log("Received data to submit:", dataToSend); // Logowanie danych
-    console.log("CLIENT_ID:", process.env.CLIENT_ID); // Logowanie CLIENT_ID
-    console.log("SPREADSHEET_ID:", process.env.SPREADSHEET_ID); // Logowanie SPREADSHEET_ID
+    console.log("Received data to submit:", dataToSend);
+    console.log("CLIENT_ID:", process.env.CLIENT_ID);
+    console.log("SPREADSHEET_ID:", process.env.SPREADSHEET_ID);
 
     try {
-        const accessToken = await refreshAccessToken(); // Odświeżenie tokenu dostępu
+        const accessToken = await refreshAccessToken();
+        console.log("Access Token:", accessToken); // Logowanie tokenu dostępu
         const response = await axios.post(
-            `https://sheets.googleapis.com/v4/spreadsheets/${process.env.SPREADSHEET_ID}/values/scaned_products!A:F:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`,
+            `https://sheets.googleapis.com/v4/spreadsheets/${process.env.SPREADSHEET_ID}/values/products!A:J:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`,
             { values: dataToSend },
             {
                 headers: {
-                    'Authorization': `Bearer ${accessToken}`, // Użycie odświeżonego tokenu dostępu
+                    'Authorization': `Bearer ${accessToken}`,
                     'Content-Type': 'application/json'
                 }
             }
         );
-        console.log("Data submitted successfully:", response.data); // Logowanie odpowiedzi
+        console.log("Data submitted successfully:", response.data);
         res.status(200).json({ message: 'Data submitted successfully!', response: response.data });
     } catch (error) {
-        console.error('Error submitting data:', error.response ? error.response.data : error.message); // Logowanie błędu
+        console.error('Error submitting data:', error.response ? error.response.data : error.message);
         res.status(500).json({ error: 'Error submitting data.' });
     }
 });
+
 
 // Endpoint do uzyskiwania informacji o produkcie
 app.get('/api/:barcode', async (req, res) => {
