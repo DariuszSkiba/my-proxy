@@ -22,6 +22,16 @@ app.use((req, res, next) => {
 
 app.use(express.json()); // Middleware do parsowania JSON request bodies
 
+// Endpoint do przekierowania OAuth
+app.get('/api/auth', (req, res) => {
+    const code = req.query.code;
+    if (code) {
+        res.send('Authorization successful. Code: ' + code);
+    } else {
+        res.send('No code received.');
+    }
+});
+
 // Funkcja do odświeżenia tokenu dostępu
 async function refreshAccessToken() {
     try {
