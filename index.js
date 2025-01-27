@@ -127,6 +127,35 @@ app.post('/api/submit-data', async (req, res) => {
     }
 });
 
+app.post('/api/update-products', async (req, res) => {
+    const updatedData = req.body;
+    console.log("Received updated data to save:", JSON.stringify(updatedData, null, 2));
+
+    try {
+        const accessToken = await refreshAccessToken();
+        console.log("Access Token:", accessToken); // Logowanie tokenu dostępu
+        const response = await axios.put(
+            `https://sheets.googleapis.com/v4/spreadsheets/${process.env.SPREADSHEET_ID}/values/products!A2:D?valueInputOption=USER_ENTERED`,
+            { values: updatedData },
+            {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json'
+                }
+            }
+        );
+        console.log("Data updated successfully:", response.data);
+        res.status(200).json({ message: 'Data updated successfully!', response: response.data });
+    } catch (error) {
+        console.error('Error updating data:', error.response ? error.response.data : error.message);
+        if (error.response) {
+            console.log("Error details:", error.response.data);
+        }
+        res.status(500).json({ error: 'Error updating data.' });
+    }
+});
+
+
 // Endpoint do uzyskiwania informacji o produkcie
 app.get('/api/:barcode', async (req, res) => {
     try {
