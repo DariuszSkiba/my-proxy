@@ -52,12 +52,12 @@ async function refreshAccessToken() {
 app.post('/api/submit-data', async (req, res) => {
     const dataToSend = req.body.values;
     console.log("Received data to submit:", JSON.stringify(dataToSend, null, 2)); // Logowanie danych przed wysłaniem
-    console.log("CLIENT_ID:", process.env.CLIENT_ID);
-    console.log("SPREADSHEET_ID:", process.env.SPREADSHEET_ID);
+
+    // Dodaj dodatkowe logowanie, aby upewnić się, że dane mają poprawną strukturę
+    console.log("Formatted data to send:", JSON.stringify({ values: dataToSend }, null, 2));
 
     try {
         const accessToken = await refreshAccessToken();
-        console.log("Access Token:", accessToken); // Logowanie tokenu dostępu
         const response = await axios.post(
             `https://sheets.googleapis.com/v4/spreadsheets/${process.env.SPREADSHEET_ID}/values/products!A:J:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`,
             { values: dataToSend },
@@ -78,6 +78,7 @@ app.post('/api/submit-data', async (req, res) => {
         res.status(500).json({ error: 'Error submitting data.' });
     }
 });
+
 
 // Endpoint do uzyskiwania informacji o produkcie
 app.get('/api/:barcode', async (req, res) => {
