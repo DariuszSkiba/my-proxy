@@ -51,6 +51,7 @@ async function refreshAccessToken() {
 // Endpoint do przesyłania danych do Google Sheets
 app.post('/api/submit-data', async (req, res) => {
     const dataToSend = req.body.values;
+    console.log("Received full request body:", JSON.stringify(req.body, null, 2)); // Logowanie całego żądania
     console.log("Received data to submit:", JSON.stringify(dataToSend, null, 2)); // Logowanie danych przed wysłaniem
     console.log("CLIENT_ID:", process.env.CLIENT_ID);
     console.log("SPREADSHEET_ID:", process.env.SPREADSHEET_ID);
