@@ -40,6 +40,8 @@ app.use('/greenroom', async (req, res) => {
         console.error('Error proxying request:', error.message);
         if (error.response) {
             console.log("Error details:", error.response.data);
+        } else {
+            console.log("Error details:", error);
         }
         res.status(500).send(`Error proxying request: ${error.message}`);
     }
@@ -157,7 +159,7 @@ app.post('/csp-report', express.json({ type: 'application/csp-report' }), (req, 
 
 // Endpoint do sprawdzania zdrowia serwera
 app.get('/health', (req, res) => {
-    res.send('I, Proxy Server, am still staying to watch for your safety!');
+    res.send('I, Proxy Server am still staying to watch for your safety!');
 });
 
 // Uruchomienie serwera na porcie 3000 lub zmiennej środowiskowej PORT
