@@ -50,11 +50,28 @@ async function refreshAccessToken() {
 
 // Endpoint do przesyłania danych do Google Sheets
 app.post('/api/submit-data', async (req, res) => {
-    const dataToSend = req.body.values;
-    console.log("Received full request body:", JSON.stringify(req.body, null, 2)); // Logowanie całego żądania
-    console.log("Received data to submit:", JSON.stringify(dataToSend, null, 2)); // Logowanie danych przed wysłaniem
+    const rawData = req.body;
+    console.log("Received full request body:", JSON.stringify(rawData, null, 2)); // Logowanie całego żądania
     console.log("CLIENT_ID:", process.env.CLIENT_ID);
     console.log("SPREADSHEET_ID:", process.env.SPREADSHEET_ID);
+
+    // Dodanie pustych kolumn do danych
+    const dataToSend = rawData.map(row => {
+        return [
+            row[0], // Lp
+            row[1], // Name
+            row[2], // Quantity
+            row[3], // Barcode
+            "",     // Pusta kolumna Photo
+            row[4], // ScannedData
+            "",     // Pusta kolumna removed_data
+            "",     // Kolumna column1
+            "",     // Kolumna column2
+            ""      // Kolumna column3
+        ];
+    });
+
+    console.log("Received data to submit:", JSON.stringify(dataToSend, null, 2)); // Logowanie danych przed wysłaniem
 
     try {
         const accessToken = await refreshAccessToken();
