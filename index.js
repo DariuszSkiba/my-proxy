@@ -26,6 +26,7 @@ app.use(express.json()); // Middleware do parsowania JSON request bodies
 app.use('/greenroom', async (req, res) => {
     try {
         const url = 'https://www.servicesdim.com/greenroom' + req.url;
+        console.log(`Proxying request to: ${url}`); // Logowanie URL docelowego
         const response = await axios({
             method: req.method,
             url: url,
@@ -37,7 +38,12 @@ app.use('/greenroom', async (req, res) => {
         res.send(response.data);
     } catch (error) {
         console.error('Error proxying request:', error.message);
-        res.status(500).send('Error proxying request');
+        if (error.response) {
+            console.log("Error details:", error.response.data);
+        } else {
+            console.log("Error details:", error);
+        }
+        res.status(500).send(`Error proxying request: ${error.message}`);
     }
 });
 
@@ -153,11 +159,4 @@ app.post('/csp-report', express.json({ type: 'application/csp-report' }), (req, 
 
 // Endpoint do sprawdzania zdrowia serwera
 app.get('/health', (req, res) => {
-    res.send('I, Proxy Server, am still staying to watch for your safety!');
-});
-
-// Uruchomienie serwera na porcie 3000 lub zmiennej środowiskowej PORT
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`Proxy running on port ${PORT}`);
-});
+    res.send('I, Proxy Server
