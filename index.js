@@ -81,8 +81,6 @@ app.post('/api/submit-data', async (req, res) => {
     }
 });
 
-
-
 // Endpoint do uzyskiwania informacji o produkcie
 app.get('/api/:barcode', async (req, res) => {
     try {
@@ -120,6 +118,7 @@ app.post('/csp-report', express.json({ type: 'application/csp-report' }), (req, 
 
 // Endpoint do sprawdzania zdrowia serwera
 app.get('/health', (req, res) => {
+    res.setHeader('Access-Control-Allow-Origin', corsOptions.origin);
     res.send('I, Proxy Server, am still staying to watch for your safety!');
 });
 
