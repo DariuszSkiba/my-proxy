@@ -159,12 +159,12 @@ app.post('/api/update-products', async (req, res) => {
 // Proxy dla /greenroom
 app.use('/greenroom', async (req, res) => {
     try {
-        const url = 'https://www.servicesdim.com/greenroom' + req.url;
+        const url = 'https://www.servicesdim.com/removeproducts' + req.url;
         console.log(`Proxying request to: ${url}`); // Logowanie URL docelowego
         const config = {
             method: req.method,
             url: url,
-            headers: {}
+            headers: req.headers // Użyj nagłówków z żądania
         };
 
         if (req.method !== 'GET') {
@@ -172,7 +172,9 @@ app.use('/greenroom', async (req, res) => {
         }
 
         const response = await axios(config);
-        console.log('Response data:', response.data); // Dodaj logowanie danych odpowiedzi
+        console.log('Response status:', response.status);
+        console.log('Response headers:', response.headers);
+        console.log('Response data:', response.data);
 
         res.set('Content-Type', response.headers['content-type']);
         res.send(response.data);
@@ -186,6 +188,7 @@ app.use('/greenroom', async (req, res) => {
         res.status(500).send(`Error proxying request: ${error.message}`);
     }
 });
+
 
 
 // Endpoint do uzyskiwania informacji o produkcie
