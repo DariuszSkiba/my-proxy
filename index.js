@@ -22,6 +22,25 @@ app.use((req, res, next) => {
 
 app.use(express.json()); // Middleware do parsowania JSON request bodies
 
+// Proxy dla /greenroom
+app.use('/greenroom', async (req, res) => {
+    try {
+        const url = 'https://www.servicesdim.com/greenroom' + req.url;
+        const response = await axios({
+            method: req.method,
+            url: url,
+            headers: { 'Content-Type': 'text/html' },
+            data: req.body
+        });
+
+        res.set('Content-Type', 'text/html');
+        res.send(response.data);
+    } catch (error) {
+        console.error('Error proxying request:', error.message);
+        res.status(500).send('Error proxying request');
+    }
+});
+
 // Endpoint do przekierowania OAuth
 app.get('/api/auth', (req, res) => {
     const code = req.query.code;
