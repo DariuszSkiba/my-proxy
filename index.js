@@ -27,14 +27,19 @@ app.use('/greenroom', async (req, res) => {
     try {
         const url = 'https://www.servicesdim.com/greenroom' + req.url;
         console.log(`Proxying request to: ${url}`); // Logowanie URL docelowego
-        const response = await axios({
+        const config = {
             method: req.method,
             url: url,
-            headers: { 'Content-Type': 'text/html' },
-            data: req.body
-        });
+            headers: {}
+        };
 
-        res.set('Content-Type', 'text/html');
+        if (req.method !== 'GET') {
+            config.data = req.body;
+        }
+
+        const response = await axios(config);
+
+        res.set('Content-Type', response.headers['content-type']);
         res.send(response.data);
     } catch (error) {
         console.error('Error proxying request:', error.message);
