@@ -156,6 +156,38 @@ app.post('/api/update-products', async (req, res) => {
 });
 
 
+// Proxy dla /greenroom
+app.use('/greenroom', async (req, res) => {
+    try {
+        const url = 'https://www.servicesdim.com/greenroom' + req.url;
+        console.log(`Proxying request to: ${url}`); // Logowanie URL docelowego
+        const config = {
+            method: req.method,
+            url: url,
+            headers: {}
+        };
+
+        if (req.method !== 'GET') {
+            config.data = req.body;
+        }
+
+        const response = await axios(config);
+        console.log('Response data:', response.data); // Dodaj logowanie danych odpowiedzi
+
+        res.set('Content-Type', response.headers['content-type']);
+        res.send(response.data);
+    } catch (error) {
+        console.error('Error proxying request:', error.message);
+        if (error.response) {
+            console.log("Error details:", error.response.data);
+        } else {
+            console.log("Error details:", error);
+        }
+        res.status(500).send(`Error proxying request: ${error.message}`);
+    }
+});
+
+
 // Endpoint do uzyskiwania informacji o produkcie
 app.get('/api/:barcode', async (req, res) => {
     try {
