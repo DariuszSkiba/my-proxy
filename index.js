@@ -162,7 +162,7 @@ const https = require('https');
 // Proxy dla /removeproducts
 app.use('/removeproducts', async (req, res) => {
     try {
-        const url = 'https://www.servicesdim.com' + req.url; // Poprawiony URL
+        const url = 'https://www.servicesdim.com' + req.url;
         console.log(`Proxying request to: ${url}`); // Logowanie URL docelowego
 
         const agent = new https.Agent({
@@ -189,13 +189,13 @@ app.use('/removeproducts', async (req, res) => {
         const response = await axios(config);
         const contentType = response.headers['content-type'];
         
-        if (!contentType.includes('application/json')) {
-            throw new Error(`Expected JSON but received: ${contentType}`);
-        }
-        
         console.log('Response status:', response.status);
         console.log('Response headers:', response.headers);
         console.log('Response data:', response.data);
+
+        if (!contentType.includes('application/json')) {
+            throw new Error(`Expected JSON but received: ${contentType}`);
+        }
 
         res.set('Content-Type', 'application/json'); // Ustawienie nagłówka Content-Type na JSON
         res.send(response.data);
