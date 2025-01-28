@@ -3,6 +3,7 @@ require('dotenv').config(); // Wczytaj zmienne środowiskowe z pliku .env
 const express = require('express');
 const axios = require('axios');
 const app = express();
+const https = require('https');
 
 const corsOptions = {
     origin: 'https://www-servicesdim-com.filesusr.com', // Zastąp swoją domeną Wix
@@ -156,7 +157,6 @@ app.post('/api/update-products', async (req, res) => {
 });
 
 
-const https = require('https');
 
 // Proxy dla /removeproducts
 app.use('/removeproducts', async (req, res) => {
@@ -202,12 +202,15 @@ app.use('/removeproducts', async (req, res) => {
         console.error('Error proxying request:', error.message);
         if (error.response) {
             console.log("Error details:", error.response.data);
+            res.status(error.response.status).send(`Error proxying request: ${error.message}`);
         } else {
             console.log("Error details:", error);
+            res.status(500).send(`Error proxying request: ${error.message}`);
         }
-        res.status(500).send(`Error proxying request: ${error.message}`);
     }
 });
+
+
 
 
 
