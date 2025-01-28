@@ -3,7 +3,6 @@ require('dotenv').config(); // Wczytaj zmienne środowiskowe z pliku .env
 const express = require('express');
 const axios = require('axios');
 const app = express();
-const https = require('https');
 
 const corsOptions = {
     origin: 'https://www-servicesdim-com.filesusr.com', // Zastąp swoją domeną Wix
@@ -157,29 +156,15 @@ app.post('/api/update-products', async (req, res) => {
 });
 
 
-const https = require('https');
-
-// Proxy dla /removeproducts
-app.use('/removeproducts', async (req, res) => {
+// Proxy dla /greenroom
+app.use('/greenroom', async (req, res) => {
     try {
-        const url = 'https://www.servicesdim.com' + req.url;
+        const url = 'https://www.servicesdim.com/removeproducts' + req.url;
         console.log(`Proxying request to: ${url}`); // Logowanie URL docelowego
-
-        const agent = new https.Agent({
-            keepAlive: true,
-            rejectUnauthorized: false, // Opcjonalne: akceptowanie niezweryfikowanych certyfikatów
-            secureProtocol: 'TLSv1_2_method' // Wymuszenie użycia TLS 1.2
-        });
-
         const config = {
             method: req.method,
             url: url,
-            headers: {
-                ...req.headers,
-                'Authorization': `Bearer ${process.env.ACCESS_TOKEN}`,
-                'Accept': 'application/json' // Dodanie nagłówka Accept
-            },
-            httpsAgent: agent
+            headers: req.headers // Użyj nagłówków z żądania
         };
 
         if (req.method !== 'GET') {
@@ -187,27 +172,20 @@ app.use('/removeproducts', async (req, res) => {
         }
 
         const response = await axios(config);
-        const contentType = response.headers['content-type'];
-        
         console.log('Response status:', response.status);
         console.log('Response headers:', response.headers);
         console.log('Response data:', response.data);
 
-        if (!contentType.includes('application/json')) {
-            throw new Error(`Expected JSON but received: ${contentType}`);
-        }
-
-        res.set('Content-Type', 'application/json'); // Ustawienie nagłówka Content-Type na JSON
+        res.set('Content-Type', response.headers['content-type']);
         res.send(response.data);
     } catch (error) {
         console.error('Error proxying request:', error.message);
         if (error.response) {
             console.log("Error details:", error.response.data);
-            res.status(error.response.status).send(`Error proxying request: ${error.message}`);
         } else {
             console.log("Error details:", error);
-            res.status(500).send(`Error proxying request: ${error.message}`);
         }
+        res.status(500).send(`Error proxying request: ${error.message}`);
     }
 });
 
