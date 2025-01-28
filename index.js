@@ -5,10 +5,12 @@ const axios = require('axios');
 const app = express();
 
 const corsOptions = {
-    origin: 'https://www-servicesdim-com.filesusr.com', // Zastąp swoją domeną Wix
-    methods: 'GET, POST, OPTIONS',
-    allowedHeaders: 'Content-Type'
+    origin: 'https://www-servicesdim-com.filesusr.com', // lub '*'
+    methods: 'GET,PUT,POST,DELETE,OPTIONS',
+    allowedHeaders: 'Content-Type, Authorization, Content-Length, X-Requested-With'
 };
+
+app.use(cors(corsOptions));
 
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', corsOptions.origin);
