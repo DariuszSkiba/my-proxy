@@ -166,7 +166,8 @@ app.use('/greenroom', async (req, res) => {
             url: url,
             headers: {
                 ...req.headers,
-                'Authorization': `Bearer ${process.env.ACCESS_TOKEN}` // Dodanie nagłówka autoryzacyjnego
+                'Authorization': `Bearer ${process.env.ACCESS_TOKEN}`,
+                'Accept': 'application/json' // Dodanie nagłówka Accept
             }
         };
 
@@ -175,11 +176,17 @@ app.use('/greenroom', async (req, res) => {
         }
 
         const response = await axios(config);
+        const contentType = response.headers['content-type'];
+        
+        if (!contentType.includes('application/json')) {
+            throw new Error(`Expected JSON but received: ${contentType}`);
+        }
+        
         console.log('Response status:', response.status);
         console.log('Response headers:', response.headers);
         console.log('Response data:', response.data);
 
-        res.set('Content-Type', response.headers['content-type']);
+        res.set('Content-Type', 'application/json'); // Ustawienie nagłówka Content-Type na JSON
         res.send(response.data);
     } catch (error) {
         console.error('Error proxying request:', error.message);
@@ -191,6 +198,7 @@ app.use('/greenroom', async (req, res) => {
         res.status(500).send(`Error proxying request: ${error.message}`);
     }
 });
+
 
 
 
