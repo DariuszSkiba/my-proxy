@@ -156,11 +156,20 @@ app.post('/api/update-products', async (req, res) => {
 });
 
 
+const https = require('https');
+
 // Proxy dla /removeproducts
 app.use('/removeproducts', async (req, res) => {
     try {
         const url = 'https://www.servicesdim.com' + req.url; // Poprawiony URL
         console.log(`Proxying request to: ${url}`); // Logowanie URL docelowego
+
+        const agent = new https.Agent({
+            keepAlive: true,
+            rejectUnauthorized: false, // Opcjonalne: akceptowanie niezweryfikowanych certyfikatów
+            secureProtocol: 'TLSv1_2_method' // Wymuszenie użycia TLS 1.2
+        });
+
         const config = {
             method: req.method,
             url: url,
@@ -168,7 +177,8 @@ app.use('/removeproducts', async (req, res) => {
                 ...req.headers,
                 'Authorization': `Bearer ${process.env.ACCESS_TOKEN}`,
                 'Accept': 'application/json' // Dodanie nagłówka Accept
-            }
+            },
+            httpsAgent: agent
         };
 
         if (req.method !== 'GET') {
@@ -198,9 +208,6 @@ app.use('/removeproducts', async (req, res) => {
         res.status(500).send(`Error proxying request: ${error.message}`);
     }
 });
-
-
-
 
 
 
