@@ -159,12 +159,15 @@ app.post('/api/update-products', async (req, res) => {
 // Proxy dla /greenroom
 app.use('/greenroom', async (req, res) => {
     try {
-        const url = 'https://www.servicesdim.com/removeproducts' + req.url;
+        const url = 'https://www.servicesdim.com' + req.url;
         console.log(`Proxying request to: ${url}`); // Logowanie URL docelowego
         const config = {
             method: req.method,
             url: url,
-            headers: req.headers // Użyj nagłówków z żądania
+            headers: {
+                ...req.headers,
+                'Authorization': `Bearer ${process.env.ACCESS_TOKEN}` // Dodanie nagłówka autoryzacyjnego
+            }
         };
 
         if (req.method !== 'GET') {
@@ -188,6 +191,7 @@ app.use('/greenroom', async (req, res) => {
         res.status(500).send(`Error proxying request: ${error.message}`);
     }
 });
+
 
 
 
