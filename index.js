@@ -156,10 +156,10 @@ app.post('/api/update-products', async (req, res) => {
 });
 
 
-// Proxy dla /greenroom
-app.use('/greenroom', async (req, res) => {
+// Proxy dla /removeproducts
+app.use('/removeproducts', async (req, res) => {
     try {
-        const url = 'https://www.servicesdim.com' + req.url;
+        const url = 'https://www.servicesdim.com' + req.url; // Poprawiony URL
         console.log(`Proxying request to: ${url}`); // Logowanie URL docelowego
         const config = {
             method: req.method,
@@ -198,6 +198,7 @@ app.use('/greenroom', async (req, res) => {
         res.status(500).send(`Error proxying request: ${error.message}`);
     }
 });
+
 
 
 
