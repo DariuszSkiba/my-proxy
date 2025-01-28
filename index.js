@@ -158,6 +158,8 @@ app.post('/api/update-products', async (req, res) => {
 
 
 
+const https = require('https');
+
 // Proxy dla /removeproducts
 app.use('/removeproducts', async (req, res) => {
     try {
@@ -209,6 +211,7 @@ app.use('/removeproducts', async (req, res) => {
         }
     }
 });
+
 
 
 
