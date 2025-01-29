@@ -7,7 +7,7 @@ const cors = require('cors');
 
 
 const corsOptions = {
-    origin: 'https://www-servicesdim-com.filesusr.com', // lub '*'
+    origin: 'https://servicesdim.com', // lub '*'
     methods: 'GET,PUT,POST,DELETE,OPTIONS',
     allowedHeaders: 'Content-Type, Authorization, Content-Length, X-Requested-With'
 };
