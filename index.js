@@ -163,8 +163,6 @@ app.post('/api/submit-data', async (req, res) => {
 
 
 app.post('/api/write-data', async (req, res) => {
-    console.log("Request received with body:", req.body); // Logowanie całego ciała żądania
-
     const { values } = req.body;
 
     if (!values || !Array.isArray(values)) {
@@ -172,26 +170,21 @@ app.post('/api/write-data', async (req, res) => {
         return res.status(400).json({ error: 'Invalid data format. Expected an array.' });
     }
 
-    console.log("Received values:", values); // Logowanie otrzymanych wartości
-
     const dataToSend = values.map((row, index) => [
         index + 1,      // Lp (numeracja od 1)
-        row[0],         // Name
-        row[1],         // Quantity
-        row[2],         // Barcode
-        "",             // Pusta kolumna Photo
-        "",             // ScannedData
-        "",             // Pusta kolumna modified_data
-        "",             // Kolumna column1
-        "",             // Kolumna column2
-        ""              // Kolumna column3
+        row[1],         // Name
+        row[2],         // Quantity
+        row[3],         // Barcode
+        row[4],         // Photo - pusta kolumna
+        row[5],         // ScannedData - pusta kolumna
+        row[6],         // modified_data - pusta kolumna
+        row[7],         // column1 - pusta kolumna
+        row[8],         // column2 - pusta kolumna
+        row[9]          // column3 - pusta kolumna
     ]);
-
-    console.log("Data to send:", dataToSend); // Logowanie danych do wysłania
 
     try {
         const accessToken = await refreshAccessToken();
-        console.log("Access Token:", accessToken); // Logowanie tokenu dostępu
         const response = await axios.post(
             `https://sheets.googleapis.com/v4/spreadsheets/${process.env.SPREADSHEET_ID}/values/products!A:J:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`,
             { values: dataToSend },
@@ -202,13 +195,13 @@ app.post('/api/write-data', async (req, res) => {
                 }
             }
         );
-        console.log("Response from Google Sheets:", response.data); // Logowanie odpowiedzi z Google Sheets
         res.status(200).json({ message: 'Data submitted successfully!', response: response.data });
     } catch (error) {
         console.error('Error writing data:', error.response ? error.response.data : error.message);
         res.status(500).json({ error: 'Error writing data.' });
     }
 });
+
 
 
 
