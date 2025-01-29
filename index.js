@@ -205,10 +205,23 @@ app.post('/api/write-data', async (req, res) => {
             row[9]          // column3 - pusta kolumna
         ]));
 
-        // Wyczyść istniejące dane w arkuszu, pozostawiając nagłówki
-        await axios.put(
-            `https://sheets.googleapis.com/v4/spreadsheets/${process.env.SPREADSHEET_ID}/values/products!A2:J1000?clear`,
-            null,
+        // Wyczyść istniejące dane w arkuszu
+        await axios.post(
+            `https://sheets.googleapis.com/v4/spreadsheets/${process.env.SPREADSHEET_ID}:batchUpdate`,
+            {
+                requests: [
+                    {
+                        updateCells: {
+                            range: {
+                                sheetId: /* ID arkusza */, // Zastąp ID arkusza
+                                startRowIndex: 1,
+                                endRowIndex: 1000 // Zastąp liczbą odpowiednią do zakresu, który chcesz wyczyścić
+                            },
+                            fields: "userEnteredValue"
+                        }
+                    }
+                ]
+            },
             {
                 headers: {
                     'Authorization': `Bearer ${accessToken}`,
@@ -235,6 +248,7 @@ app.post('/api/write-data', async (req, res) => {
         res.status(500).json({ error: 'Error writing data.' });
     }
 });
+
 
 
 
