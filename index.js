@@ -12,7 +12,8 @@ const corsOptions = {
     allowedHeaders: 'Content-Type, Authorization, Content-Length, X-Requested-With'
 };
 
-app.use(cors(corsOptions));
+// Zezwalanie na wszystkie pochodzenia (możesz zmienić na konkretne pochodzenia)
+app.use(cors());
 
 app.use((req, res, next) => {
     const origin = req.headers.origin;
@@ -163,7 +164,7 @@ app.post('/api/submit-data', async (req, res) => {
 
 
 app.post('/api/write-data', async (req, res) => {
-    const rawData = req.body.values; // Zmiana na `values`, aby zgadzało się z JSON przesyłanym z przeglądarki.
+    const rawData = req.body.values;
 
     if (!Array.isArray(rawData)) {
         return res.status(400).json({ error: 'Invalid data format. Expected an array.' });
@@ -194,6 +195,12 @@ app.post('/api/write-data', async (req, res) => {
 
         res.json({ message: 'Data successfully updated' });
     });
+});
+
+// Uruchomienie serwera
+const port = process.env.PORT || 3000;
+app.listen(port, () => {
+    console.log(`Server running on port ${port}`);
 });
 
 
