@@ -170,39 +170,40 @@ app.post('/api/write-data', async (req, res) => {
         return res.status(400).json({ error: 'Invalid data format. Expected an array.' });
     }
 
-    // Dodanie nagłówków, jeśli ich brakuje
-    const headers = ["Lp", "Name", "quantiti", "barcode", "Photo", "scannedData", "modified_data", "column1", "column2", "column3"];
-    const existingHeaders = await axios.get(
-        `https://sheets.googleapis.com/v4/spreadsheets/${process.env.SPREADSHEET_ID}/values/products!A1:J1`,
-        {
-            headers: {
-                'Authorization': `Bearer ${accessToken}`,
-                'Content-Type': 'application/json'
-            }
-        }
-    );
-
-    let dataToSend = [];
-    if (existingHeaders.data.values[0].join() !== headers.join()) {
-        dataToSend.push(headers);
-    }
-
-    // Mapowanie danych i dodawanie do zaktualizowanej tablicy
-    dataToSend = dataToSend.concat(values.map((row, index) => [
-        index + 1,      // Lp (numeracja od 1)
-        row[1],         // Name
-        row[2],         // Quantity
-        row[3],         // Barcode
-        row[4],         // Photo - pusta kolumna
-        row[5],         // ScannedData - pusta kolumna
-        row[6],         // modified_data - pusta kolumna
-        row[7],         // column1 - pusta kolumna
-        row[8],         // column2 - pusta kolumna
-        row[9]          // column3 - pusta kolumna
-    ]));
-
     try {
         const accessToken = await refreshAccessToken();
+
+        // Dodanie nagłówków, jeśli ich brakuje
+        const headers = ["Lp", "Name", "quantiti", "barcode", "Photo", "scannedData", "modified_data", "column1", "column2", "column3"];
+        const existingHeadersResponse = await axios.get(
+            `https://sheets.googleapis.com/v4/spreadsheets/${process.env.SPREADSHEET_ID}/values/products!A1:J1`,
+            {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json'
+                }
+            }
+        );
+
+        let dataToSend = [];
+        if (!existingHeadersResponse.data.values || existingHeadersResponse.data.values[0].join() !== headers.join()) {
+            dataToSend.push(headers);
+        }
+
+        // Mapowanie danych i dodawanie do zaktualizowanej tablicy
+        dataToSend = dataToSend.concat(values.map((row, index) => [
+            index + 1,      // Lp (numeracja od 1)
+            row[1],         // Name
+            row[2],         // Quantity
+            row[3],         // Barcode
+            row[4],         // Photo - pusta kolumna
+            row[5],         // ScannedData - pusta kolumna
+            row[6],         // modified_data - pusta kolumna
+            row[7],         // column1 - pusta kolumna
+            row[8],         // column2 - pusta kolumna
+            row[9]          // column3 - pusta kolumna
+        ]));
+
         const response = await axios.put(
             `https://sheets.googleapis.com/v4/spreadsheets/${process.env.SPREADSHEET_ID}/values/products!A:J?valueInputOption=USER_ENTERED`,
             { values: dataToSend },
@@ -213,12 +214,14 @@ app.post('/api/write-data', async (req, res) => {
                 }
             }
         );
+
         res.status(200).json({ message: 'Data updated successfully!', response: response.data });
     } catch (error) {
         console.error('Error writing data:', error.response ? error.response.data : error.message);
         res.status(500).json({ error: 'Error writing data.' });
     }
 });
+
 
 
 
