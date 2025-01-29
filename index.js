@@ -185,8 +185,8 @@ app.post('/api/write-data', async (req, res) => {
 
     try {
         const accessToken = await refreshAccessToken();
-        const response = await axios.post(
-            `https://sheets.googleapis.com/v4/spreadsheets/${process.env.SPREADSHEET_ID}/values/products!A:J:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`,
+        const response = await axios.put(
+            `https://sheets.googleapis.com/v4/spreadsheets/${process.env.SPREADSHEET_ID}/values/products!A:J?valueInputOption=USER_ENTERED`,
             { values: dataToSend },
             {
                 headers: {
@@ -195,12 +195,13 @@ app.post('/api/write-data', async (req, res) => {
                 }
             }
         );
-        res.status(200).json({ message: 'Data submitted successfully!', response: response.data });
+        res.status(200).json({ message: 'Data updated successfully!', response: response.data });
     } catch (error) {
         console.error('Error writing data:', error.response ? error.response.data : error.message);
         res.status(500).json({ error: 'Error writing data.' });
     }
 });
+
 
 
 
