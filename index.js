@@ -167,7 +167,7 @@ app.post('/api/write-data', async (req, res) => {
     const rawData = req.body.values;
 
     try {
-        const accessToken = await refreshAccessToken();
+        const accessToken = await refreshAccessToken(); // Użycie await wewnątrz funkcji async
         console.log('Received data:', rawData);
 
         if (!Array.isArray(rawData)) {
@@ -203,6 +203,13 @@ app.post('/api/write-data', async (req, res) => {
         console.error('Error:', error);
         return res.status(500).json({ error: 'Internal server error' });
     }
+});
+
+
+// Run the server
+const port = process.env.PORT || 3000;
+app.listen(port, () => {
+    console.log(`Server running on port ${port}`);
 });
 
 
