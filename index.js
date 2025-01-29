@@ -163,7 +163,11 @@ app.post('/api/submit-data', async (req, res) => {
 
 
 app.post('/api/write-data', async (req, res) => {
-    const rawData = req.body;
+    const rawData = req.body.values; // Zmiana na `values`, aby zgadzało się z JSON przesyłanym z przeglądarki.
+
+    if (!Array.isArray(rawData)) {
+        return res.status(400).json({ error: 'Invalid data format. Expected an array.' });
+    }
 
     // Dodawanie pustych kolumn do danych
     const dataToSend = rawData.map(row => {
@@ -180,6 +184,18 @@ app.post('/api/write-data', async (req, res) => {
             ""      // Kolumna column3
         ];
     });
+
+    // Zapis danych do pliku (przykład)
+    fs.writeFile('path/to/your/file.csv', Papa.unparse(dataToSend), (err) => {
+        if (err) {
+            console.error('Error writing file:', err);
+            return res.status(500).json({ error: 'Failed to write data' });
+        }
+
+        res.json({ message: 'Data successfully updated' });
+    });
+});
+
 
     try {
         const accessToken = await refreshAccessToken();
