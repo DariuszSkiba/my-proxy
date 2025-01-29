@@ -7,7 +7,7 @@ const cors = require('cors');
 
 
 const corsOptions = {
-    origin: ['https://servicesdim.com', 'https://www-servicesdim-com.filesusr.com'], // Allow both origins
+    origin: ['https://servicesdim.com', 'https://www-servicesdim-com.filesusr.com'],
     methods: 'GET,PUT,POST,DELETE,OPTIONS',
     allowedHeaders: 'Content-Type, Authorization, Content-Length, X-Requested-With'
 };
@@ -165,6 +165,10 @@ app.post('/api/submit-data', async (req, res) => {
 app.post('/api/write-data', async (req, res) => {
     const rawData = req.body;
 
+    if (!Array.isArray(rawData)) {
+        return res.status(400).json({ error: 'Invalid data format. Expected an array.' });
+    }
+
     // Dodawanie pustych kolumn do danych
     const dataToSend = rawData.map(row => {
         return [
@@ -199,6 +203,7 @@ app.post('/api/write-data', async (req, res) => {
         res.status(500).json({ error: 'Error writing data.' });
     }
 });
+
 
 
 
