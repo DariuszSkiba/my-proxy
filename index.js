@@ -82,6 +82,29 @@ async function refreshAccessToken() {
     }
 }
 
+app.get('/api/read-data', async (req, res) => {
+    try {
+        const accessToken = await refreshAccessToken();
+        console.log('Access Token:', accessToken); // Logowanie tokena
+        const response = await axios.get(
+            `https://sheets.googleapis.com/v4/spreadsheets/${process.env.SPREADSHEET_ID}/values/products!A:J`,
+            {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json'
+                }
+            }
+        );
+        console.log('Response data:', response.data); // Logowanie odpowiedzi
+        res.status(200).json(response.data);
+    } catch (error) {
+        console.error('Error reading data:', error.response ? error.response.data : error.message);
+        res.status(500).json({ error: 'Error reading data.' });
+    }
+});
+
+
+
 // Endpoint do przesyłania danych do Google Sheets
 app.post('/api/submit-data', async (req, res) => {
     const rawData = req.body;
@@ -130,28 +153,6 @@ app.post('/api/submit-data', async (req, res) => {
         res.status(500).json({ error: 'Error submitting data.' });
     }
 });
-
-app.get('/api/read-data', async (req, res) => {
-    try {
-        const accessToken = await refreshAccessToken();
-		console.log('Access Token:', accessToken); // Logowanie tokena
-        const response = await axios.get(
-            `https://sheets.googleapis.com/v4/spreadsheets/${process.env.SPREADSHEET_ID}/values/products!A:J`,
-            {
-                headers: {
-                    'Authorization': `Bearer ${accessToken}`,
-                    'Content-Type': 'application/json'
-                }
-            }
-        );
-        res.status(200).json(response.data);
-    } catch (error) {
-        console.error('Error reading data:', error.response ? error.response.data : error.message);
-        res.status(500).json({ error: 'Error reading data.' });
-    }
-});
-
-
 
 
 app.post('/api/write-data', async (req, res) => {
