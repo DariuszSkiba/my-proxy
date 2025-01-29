@@ -134,6 +134,7 @@ app.post('/api/submit-data', async (req, res) => {
 app.get('/api/read-data', async (req, res) => {
     try {
         const accessToken = await refreshAccessToken();
+		console.log('Access Token:', accessToken); // Logowanie tokena
         const response = await axios.get(
             `https://sheets.googleapis.com/v4/spreadsheets/${process.env.SPREADSHEET_ID}/values/products!A:J`,
             {
