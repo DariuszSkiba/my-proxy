@@ -99,10 +99,13 @@ app.get('/api/read-data', async (req, res) => {
         res.status(200).json(response.data);
     } catch (error) {
         console.error('Error reading data:', error.response ? error.response.data : error.message);
-        res.status(500).json({ error: 'Error reading data.' });
+        if (error.response && error.response.status === 403) {
+            res.status(403).json({ error: 'Access to the resource is forbidden.' });
+        } else {
+            res.status(500).json({ error: 'Error reading data.' });
+        }
     }
 });
-
 
 
 // Endpoint do przesyłania danych do Google Sheets
