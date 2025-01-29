@@ -170,7 +170,25 @@ app.post('/api/write-data', async (req, res) => {
         return res.status(400).json({ error: 'Invalid data format. Expected an array.' });
     }
 
-    const dataToSend = values.map((row, index) => [
+    // Dodanie nagłówków, jeśli ich brakuje
+    const headers = ["Lp", "Name", "quantiti", "barcode", "Photo", "scannedData", "modified_data", "column1", "column2", "column3"];
+    const existingHeaders = await axios.get(
+        `https://sheets.googleapis.com/v4/spreadsheets/${process.env.SPREADSHEET_ID}/values/products!A1:J1`,
+        {
+            headers: {
+                'Authorization': `Bearer ${accessToken}`,
+                'Content-Type': 'application/json'
+            }
+        }
+    );
+
+    let dataToSend = [];
+    if (existingHeaders.data.values[0].join() !== headers.join()) {
+        dataToSend.push(headers);
+    }
+
+    // Mapowanie danych i dodawanie do zaktualizowanej tablicy
+    dataToSend = dataToSend.concat(values.map((row, index) => [
         index + 1,      // Lp (numeracja od 1)
         row[1],         // Name
         row[2],         // Quantity
@@ -181,7 +199,7 @@ app.post('/api/write-data', async (req, res) => {
         row[7],         // column1 - pusta kolumna
         row[8],         // column2 - pusta kolumna
         row[9]          // column3 - pusta kolumna
-    ]);
+    ]));
 
     try {
         const accessToken = await refreshAccessToken();
@@ -201,11 +219,6 @@ app.post('/api/write-data', async (req, res) => {
         res.status(500).json({ error: 'Error writing data.' });
     }
 });
-
-
-
-
-
 
 
 
