@@ -185,6 +185,7 @@ app.post('/api/write-data', async (req, res) => {
             }
         );
 
+        // Sprawdź czy istnieją nagłówki, jeśli nie dodaj nagłówki
         let dataToSend = [];
         if (!existingHeadersResponse.data.values || existingHeadersResponse.data.values[0].join() !== headers.join()) {
             dataToSend.push(headers);
@@ -204,8 +205,21 @@ app.post('/api/write-data', async (req, res) => {
             row[9]          // column3 - pusta kolumna
         ]));
 
+        // Wyczyść istniejące dane w arkuszu, pozostawiając nagłówki
+        await axios.put(
+            `https://sheets.googleapis.com/v4/spreadsheets/${process.env.SPREADSHEET_ID}/values/products!A2:J1000?clear`,
+            null,
+            {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json'
+                }
+            }
+        );
+
+        // Zapisz nowe dane do arkusza
         const response = await axios.put(
-            `https://sheets.googleapis.com/v4/spreadsheets/${process.env.SPREADSHEET_ID}/values/products!A:J?valueInputOption=USER_ENTERED`,
+            `https://sheets.googleapis.com/v4/spreadsheets/${process.env.SPREADSHEET_ID}/values/products!A2:J?valueInputOption=USER_ENTERED`,
             { values: dataToSend },
             {
                 headers: {
@@ -221,6 +235,7 @@ app.post('/api/write-data', async (req, res) => {
         res.status(500).json({ error: 'Error writing data.' });
     }
 });
+
 
 
 
