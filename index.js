@@ -12,8 +12,7 @@ const corsOptions = {
     allowedHeaders: 'Content-Type, Authorization, Content-Length, X-Requested-With'
 };
 
-// Zezwalanie na wszystkie pochodzenia (możesz zmienić na konkretne pochodzenia)
-app.use(cors());
+app.use(cors(corsOptions));
 
 app.use((req, res, next) => {
     const origin = req.headers.origin;
@@ -164,61 +163,23 @@ app.post('/api/submit-data', async (req, res) => {
 
 
 app.post('/api/write-data', async (req, res) => {
-    const rawData = req.body.values;
+    const rawData = req.body;
 
-    try {
-        const accessToken = await refreshAccessToken(); // Użycie await wewnątrz funkcji async
-        console.log('Received data:', rawData);
-
-        if (!Array.isArray(rawData)) {
-            return res.status(400).json({ error: 'Invalid data format. Expected an array.' });
-        }
-
-        // Dodawanie pustych kolumn do danych
-        const dataToSend = rawData.map(row => {
-            return [
-                row[0], // Lp
-                row[1], // Name
-                row[2], // Quantity
-                row[3], // Barcode
-                "",     // Pusta kolumna Photo
-                row[4], // ScannedData
-                "",     // Pusta kolumna modified_data
-                "",     // Kolumna column1
-                "",     // Kolumna column2
-                ""      // Kolumna column3
-            ];
-        });
-
-        // Zapis danych do pliku (przykład)
-        fs.writeFile('path/to/your/file.csv', Papa.unparse(dataToSend), (err) => {
-            if (err) {
-                console.error('Error writing file:', err);
-                return res.status(500).json({ error: 'Failed to write data' });
-            }
-
-            res.json({ message: 'Data successfully updated' });
-        });
-    } catch (error) {
-        console.error('Error:', error);
-        return res.status(500).json({ error: 'Internal server error' });
-    }
-});
-
-
-// Run the server
-const port = process.env.PORT || 3000;
-app.listen(port, () => {
-    console.log(`Server running on port ${port}`);
-});
-
-
-// Uruchomienie serwera
-const port = process.env.PORT || 3000;
-app.listen(port, () => {
-    console.log(`Server running on port ${port}`);
-});
-
+    // Dodawanie pustych kolumn do danych
+    const dataToSend = rawData.map(row => {
+        return [
+            row[0], // Lp
+            row[1], // Name
+            row[2], // Quantity
+            row[3], // Barcode
+            "",     // Pusta kolumna Photo
+            row[4], // ScannedData
+            "",     // Pusta kolumna modified_data
+            "",     // Kolumna column1
+            "",     // Kolumna column2
+            ""      // Kolumna column3
+        ];
+    });
 
     try {
         const accessToken = await refreshAccessToken();
