@@ -7,7 +7,7 @@ const cors = require('cors');
 
 
 const corsOptions = {
-    origin: 'https://servicesdim.com', // lub '*'
+    origin: ['https://servicesdim.com', 'https://www-servicesdim-com.filesusr.com'], // Allow both origins
     methods: 'GET,PUT,POST,DELETE,OPTIONS',
     allowedHeaders: 'Content-Type, Authorization, Content-Length, X-Requested-With'
 };
@@ -15,7 +15,10 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 app.use((req, res, next) => {
-    res.setHeader('Access-Control-Allow-Origin', corsOptions.origin);
+    const origin = req.headers.origin;
+    if (corsOptions.origin.includes(origin)) {
+        res.setHeader('Access-Control-Allow-Origin', origin);
+    }
     res.setHeader('Access-Control-Allow-Methods', corsOptions.methods);
     res.setHeader('Access-Control-Allow-Headers', corsOptions.allowedHeaders);
     if (req.method === 'OPTIONS') {
@@ -23,6 +26,7 @@ app.use((req, res, next) => {
     }
     next();
 });
+
 
 app.use(express.json()); // Middleware do parsowania JSON request bodies
 
