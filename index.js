@@ -152,6 +152,7 @@ app.get('/api/read-data', async (req, res) => {
 
 
 
+
 app.post('/api/write-data', async (req, res) => {
     const rawData = req.body;
 
