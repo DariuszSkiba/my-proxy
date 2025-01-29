@@ -151,6 +151,7 @@ app.get('/api/read-data', async (req, res) => {
 });
 
 
+
 app.post('/api/write-data', async (req, res) => {
     const rawData = req.body;
 
@@ -188,6 +189,7 @@ app.post('/api/write-data', async (req, res) => {
         res.status(500).json({ error: 'Error writing data.' });
     }
 });
+
 
 
 
