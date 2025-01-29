@@ -131,16 +131,11 @@ app.post('/api/submit-data', async (req, res) => {
     }
 });
 
-app.post('/api/update-products', async (req, res) => {
-    const updatedData = req.body;
-    console.log("Received updated data to save:", JSON.stringify(updatedData, null, 2));
-
+app.get('/api/read-data', async (req, res) => {
     try {
         const accessToken = await refreshAccessToken();
-        console.log("Access Token:", accessToken); // Logowanie tokenu dostępu
-        const response = await axios.put(
-            `https://sheets.googleapis.com/v4/spreadsheets/${process.env.SPREADSHEET_ID}/values/products!A2:D?valueInputOption=USER_ENTERED`,
-            { values: updatedData },
+        const response = await axios.get(
+            `https://sheets.googleapis.com/v4/spreadsheets/${process.env.SPREADSHEET_ID}/values/products!A:J`,
             {
                 headers: {
                     'Authorization': `Bearer ${accessToken}`,
@@ -148,16 +143,52 @@ app.post('/api/update-products', async (req, res) => {
                 }
             }
         );
-        console.log("Data updated successfully:", response.data);
-        res.status(200).json({ message: 'Data updated successfully!', response: response.data });
+        res.status(200).json(response.data);
     } catch (error) {
-        console.error('Error updating data:', error.response ? error.response.data : error.message);
-        if (error.response) {
-            console.log("Error details:", error.response.data);
-        }
-        res.status(500).json({ error: 'Error updating data.' });
+        console.error('Error reading data:', error.response ? error.response.data : error.message);
+        res.status(500).json({ error: 'Error reading data.' });
     }
 });
+
+
+app.post('/api/write-data', async (req, res) => {
+    const rawData = req.body;
+
+    // Dodawanie pustych kolumn do danych
+    const dataToSend = rawData.map(row => {
+        return [
+            row[0], // Lp
+            row[1], // Name
+            row[2], // Quantity
+            row[3], // Barcode
+            "",     // Pusta kolumna Photo
+            row[4], // ScannedData
+            "",     // Pusta kolumna modified_data
+            "",     // Kolumna column1
+            "",     // Kolumna column2
+            ""      // Kolumna column3
+        ];
+    });
+
+    try {
+        const accessToken = await refreshAccessToken();
+        const response = await axios.post(
+            `https://sheets.googleapis.com/v4/spreadsheets/${process.env.SPREADSHEET_ID}/values/products!A:J:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`,
+            { values: dataToSend },
+            {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json'
+                }
+            }
+        );
+        res.status(200).json({ message: 'Data submitted successfully!', response: response.data });
+    } catch (error) {
+        console.error('Error writing data:', error.response ? error.response.data : error.message);
+        res.status(500).json({ error: 'Error writing data.' });
+    }
+});
+
 
 
 // Proxy dla /greenroom
