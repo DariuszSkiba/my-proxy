@@ -384,11 +384,6 @@ app.post('/api/write-schedule', async (req, res) => {
     }
 });
 
-app.listen(3000, () => {
-    console.log('Server is running on port 3000');
-});
-
-
 
 
 // Proxy dla /greenroom
