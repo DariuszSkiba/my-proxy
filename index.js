@@ -165,7 +165,8 @@ app.post('/api/submit-data', async (req, res) => {
 app.post('/api/write-data', async (req, res) => {
     const { values } = req.body;
     const spreadsheetId = process.env.SPREADSHEET_ID;
-    const sheetId = process.env.SHEETID_PRODUCTS; // Użyj zmiennej środowiskowej dla sheetId
+    const sheetId = parseInt(process.env.SHEETID_PRODUCTS, 10); // Upewnij się, że to jest liczba całkowita
+    console.log('Sheet ID:', sheetId);
 
     if (!values || !Array.isArray(values)) {
         console.error("Invalid data format. Expected an array.");
@@ -174,8 +175,8 @@ app.post('/api/write-data', async (req, res) => {
 
     try {
         const accessToken = await refreshAccessToken();
+        console.log('Access Token:', accessToken);
 
-        // Dodanie nagłówków, jeśli ich brakuje
         const headers = ["Lp", "Name", "quantiti", "barcode", "Photo", "scannedData", "modified_data", "column1", "column2", "column3"];
         const existingHeadersResponse = await axios.get(
             `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/products!A1:J1`,
@@ -186,26 +187,26 @@ app.post('/api/write-data', async (req, res) => {
                 }
             }
         );
+        console.log('Existing Headers Response:', existingHeadersResponse.data);
 
-        // Sprawdź czy istnieją nagłówki, jeśli nie dodaj nagłówki
         let dataToSend = [];
         if (!existingHeadersResponse.data.values || existingHeadersResponse.data.values[0].join() !== headers.join()) {
             dataToSend.push(headers);
         }
 
-        // Mapowanie danych i dodawanie do zaktualizowanej tablicy
         dataToSend = dataToSend.concat(values.map((row, index) => [
-            index + 1,      // Lp (numeracja od 1)
-            row[1],         // Name
-            row[2],         // Quantity
-            row[3],         // Barcode
-            row[4],         // Photo - pusta kolumna
-            row[5],         // ScannedData - pusta kolumna
-            row[6],         // modified_data - pusta kolumna
-            row[7],         // column1 - pusta kolumna
-            row[8],         // column2 - pusta kolumna
-            row[9]          // column3 - pusta kolumna
+            index + 1,
+            row[1],
+            row[2],
+            row[3],
+            row[4],
+            row[5],
+            row[6],
+            row[7],
+            row[8],
+            row[9]
         ]));
+        console.log('Data to Send:', dataToSend);
 
         // Wyczyść istniejące dane w arkuszu
         await axios.post(
@@ -215,9 +216,9 @@ app.post('/api/write-data', async (req, res) => {
                     {
                         updateCells: {
                             range: {
-                                sheetId: sheetId, // Użyj zmiennej środowiskowej sheetId
+                                sheetId: sheetId,
                                 startRowIndex: 1,
-                                endRowIndex: 1000 // Zastąp liczbą odpowiednią do zakresu, który chcesz wyczyścić
+                                endRowIndex: 1000
                             },
                             fields: "userEnteredValue"
                         }
