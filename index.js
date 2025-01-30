@@ -343,6 +343,7 @@ app.post('/api/write-schedule', async (req, res) => {
         ]));
         console.log('Data to Send:', dataToSend);
 
+        // Wyczyść istniejące dane w arkuszu
         await axios.post(
             `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}:batchUpdate`,
             {
@@ -367,6 +368,7 @@ app.post('/api/write-schedule', async (req, res) => {
             }
         );
 
+        // Zapisz nowe dane do arkusza
         const response = await axios.put(
             `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/scheduler!A2:J?valueInputOption=USER_ENTERED`, // Zmiana pliku i zakładki
             { values: dataToSend },
@@ -381,7 +383,10 @@ app.post('/api/write-schedule', async (req, res) => {
         res.status(200).json({ message: 'Data updated successfully!', response: response.data });
     } catch (error) {
         console.error('Error writing data:', error.response ? error.response.data : error.message);
-        res.status
+        res.status(500).json({ error: 'Error writing data.' });
+    }
+});
+
 
 
 // Proxy dla /greenroom
