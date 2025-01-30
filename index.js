@@ -264,6 +264,124 @@ app.listen(3000, () => {
 });
 
 
+app.get('/api/read-schedule', async (req, res) => {
+    try {
+        const accessToken = await refreshAccessToken();
+        console.log('Access Token:', accessToken); // Logowanie tokena
+        const response = await axios.get(
+            `https://sheets.googleapis.com/v4/spreadsheets/${process.env.SPREADSHEET_ID_SCHEDULE}/values/scheduler!A:J`, // Zmiana pliku i zakładki
+            {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json'
+                }
+            }
+        );
+        console.log('Response data:', response.data); // Logowanie odpowiedzi
+        res.status(200).json(response.data);
+    } catch (error) {
+        console.error('Error reading data:', error.response ? error.response.data : error.message);
+        if (error.response && error.response.status === 403) {
+            res.status(403).json({ error: 'Access to the resource is forbidden.' });
+        } else {
+            res.status(500).json({ error: 'Error reading data.' });
+        }
+    }
+});
+
+
+// Endpoint do zapisu danych do arkusza "scheduler"
+app.post('/api/write-schedule', async (req, res) => {
+    const { values } = req.body;
+    const spreadsheetId = process.env.SPREADSHEET_ID_SCHEDULE;
+    const sheetId = parseInt(process.env.SHEETID_SCHEDULE, 10); // Upewnij się, że to jest liczba całkowita
+
+    console.log('Sheet ID:', sheetId);
+
+    if (isNaN(sheetId)) {
+        console.error("Invalid sheetId. Please check your environment variables.");
+        return res.status(500).json({ error: 'Invalid sheetId. Please check your environment variables.' });
+    }
+
+    if (!values || !Array.isArray(values)) {
+        console.error("Invalid data format. Expected an array.");
+        return res.status(400).json({ error: 'Invalid data format. Expected an array.' });
+    }
+
+    try {
+        const accessToken = await refreshAccessToken();
+        console.log('Access Token:', accessToken);
+
+        const headers = ["Lp", "Name", "Surname", "Title", "Birthdate", "Email", "Mobile_Phone", "Data_Schedule", "Refused", "Last_Data_Schedule"];
+        const existingHeadersResponse = await axios.get(
+            `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/scheduler!A1:J1`, // Zmiana pliku i zakładki
+            {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json'
+                }
+            }
+        );
+        console.log('Existing Headers Response:', existingHeadersResponse.data);
+
+        let dataToSend = [];
+        if (!existingHeadersResponse.data.values || existingHeadersResponse.data.values[0].join() !== headers.join()) {
+            dataToSend.push(headers);
+        }
+
+        dataToSend = dataToSend.concat(values.map((row, index) => [
+            index + 1,
+            row[1],
+            row[2],
+            row[3],
+            row[4],
+            row[5],
+            row[6],
+            row[7],
+            row[8],
+            row[9]
+        ]));
+        console.log('Data to Send:', dataToSend);
+
+        await axios.post(
+            `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}:batchUpdate`,
+            {
+                requests: [
+                    {
+                        updateCells: {
+                            range: {
+                                sheetId: sheetId,
+                                startRowIndex: 1,
+                                endRowIndex: 1000
+                            },
+                            fields: "userEnteredValue"
+                        }
+                    }
+                ]
+            },
+            {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json'
+                }
+            }
+        );
+
+        const response = await axios.put(
+            `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/scheduler!A2:J?valueInputOption=USER_ENTERED`, // Zmiana pliku i zakładki
+            { values: dataToSend },
+            {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json'
+                }
+            }
+        );
+
+        res.status(200).json({ message: 'Data updated successfully!', response: response.data });
+    } catch (error) {
+        console.error('Error writing data:', error.response ? error.response.data : error.message);
+        res.status
 
 
 // Proxy dla /greenroom
