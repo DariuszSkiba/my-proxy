@@ -314,7 +314,7 @@ app.post('/api/write-schedule', async (req, res) => {
 
         const headers = ["Lp", "Name", "Surname", "Title", "Birthdate", "Email", "Mobile_Phone", "Data_Schedule", "Refused", "Last_Data_Schedule"];
         const existingHeadersResponse = await axios.get(
-            `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/scheduler!A1:J1`, // Zmiana pliku i zakładki
+            `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/scheduler!A1:G1`, // Pobieranie tylko kolumn od A do G
             {
                 headers: {
                     'Authorization': `Bearer ${accessToken}`,
@@ -336,10 +336,7 @@ app.post('/api/write-schedule', async (req, res) => {
             row[3],
             row[4],
             row[5],
-            row[6],
-            row[7],
-            row[8],
-            row[9]
+            row[6]
         ]));
         console.log('Data to Send:', dataToSend);
 
@@ -370,7 +367,7 @@ app.post('/api/write-schedule', async (req, res) => {
 
         // Zapisz nowe dane do arkusza
         const response = await axios.put(
-            `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/scheduler!A2:J?valueInputOption=USER_ENTERED`, // Zmiana pliku i zakładki
+            `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/scheduler!A2:G?valueInputOption=USER_ENTERED`, // Zmiana pliku i zakładki
             { values: dataToSend },
             {
                 headers: {
@@ -386,6 +383,11 @@ app.post('/api/write-schedule', async (req, res) => {
         res.status(500).json({ error: 'Error writing data.' });
     }
 });
+
+app.listen(3000, () => {
+    console.log('Server is running on port 3000');
+});
+
 
 
 
