@@ -164,6 +164,8 @@ app.post('/api/submit-data', async (req, res) => {
 
 app.post('/api/write-data', async (req, res) => {
     const { values } = req.body;
+    const spreadsheetId = process.env.SPREADSHEET_ID;
+    const sheetId = process.env.SHEETID_PRODUCTS; // Użyj zmiennej środowiskowej dla sheetId
 
     if (!values || !Array.isArray(values)) {
         console.error("Invalid data format. Expected an array.");
@@ -176,7 +178,7 @@ app.post('/api/write-data', async (req, res) => {
         // Dodanie nagłówków, jeśli ich brakuje
         const headers = ["Lp", "Name", "quantiti", "barcode", "Photo", "scannedData", "modified_data", "column1", "column2", "column3"];
         const existingHeadersResponse = await axios.get(
-            `https://sheets.googleapis.com/v4/spreadsheets/${process.env.SPREADSHEET_ID}/values/products!A1:J1`,
+            `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/products!A1:J1`,
             {
                 headers: {
                     'Authorization': `Bearer ${accessToken}`,
@@ -207,13 +209,13 @@ app.post('/api/write-data', async (req, res) => {
 
         // Wyczyść istniejące dane w arkuszu
         await axios.post(
-            `https://sheets.googleapis.com/v4/spreadsheets/${process.env.SPREADSHEET_ID}:batchUpdate`,
+            `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}:batchUpdate`,
             {
                 requests: [
                     {
                         updateCells: {
                             range: {
-                                sheetId: /* ID arkusza */, // Zastąp ID arkusza
+                                sheetId: sheetId, // Użyj zmiennej środowiskowej sheetId
                                 startRowIndex: 1,
                                 endRowIndex: 1000 // Zastąp liczbą odpowiednią do zakresu, który chcesz wyczyścić
                             },
@@ -232,7 +234,7 @@ app.post('/api/write-data', async (req, res) => {
 
         // Zapisz nowe dane do arkusza
         const response = await axios.put(
-            `https://sheets.googleapis.com/v4/spreadsheets/${process.env.SPREADSHEET_ID}/values/products!A2:J?valueInputOption=USER_ENTERED`,
+            `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/products!A2:J?valueInputOption=USER_ENTERED`,
             { values: dataToSend },
             {
                 headers: {
