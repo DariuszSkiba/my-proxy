@@ -301,18 +301,35 @@ app.use('/greenroom', async (req, res) => {
 
 
 
+const NodeCache = require('node-cache');
+const cache = new NodeCache({ stdTTL: 3600 }); // 1 hour TTL
+
 // Endpoint do uzyskiwania informacji o produkcie
 app.get('/api/:barcode', async (req, res) => {
     try {
         const { barcode } = req.params;
+        const cachedData = cache.get(barcode);
+
+        if (cachedData) {
+            console.log('Returning cached data');
+            return res.json(cachedData);
+        }
+
         const apiUrl = `https://world.openfoodfacts.org/api/v0/product/${barcode}.json`;
         console.log(`Fetching from API: ${apiUrl}`);
         const response = await axios.get(apiUrl);
-        res.setHeader('Access-Control-Allow-Origin', corsOptions.origin);
-        res.json(response.data); // Ensure the response is JSON
+        
+        cache.set(barcode, response.data); // Cache the response data
+        res.setHeader('Content-Type', 'application/json');
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.json(response.data);
     } catch (error) {
-        console.error('Proxy error:', error);
-        res.status(500).json({ error: 'Proxy error' }); // Return JSON error response
+        console.error('Proxy error:', error.message);
+        if (error.response) {
+            console.error('Error status:', error.response.status);
+            console.error('Error details:', error.response.data);
+        }
+        res.status(500).json({ error: 'Proxy error', message: error.message });
     }
 });
 
