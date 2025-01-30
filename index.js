@@ -162,6 +162,7 @@ app.post('/api/submit-data', async (req, res) => {
 });
 
 
+// Obsługa zapisu danych
 app.post('/api/write-data', async (req, res) => {
     const { values } = req.body;
     const spreadsheetId = process.env.SPREADSHEET_ID;
@@ -258,20 +259,9 @@ app.post('/api/write-data', async (req, res) => {
     }
 });
 
-
-
-
 app.listen(3000, () => {
     console.log('Server is running on port 3000');
 });
-
-app.listen(3000, () => {
-    console.log('Server is running on port 3000');
-});
-
-const refreshAccessToken = async () => {
-    // Implementacja funkcji odświeżania tokena
-};
 
 
 
