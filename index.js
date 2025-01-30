@@ -172,11 +172,6 @@ app.post('/api/write-data', async (req, res) => {
         return res.status(400).json({ error: 'Invalid data format. Expected an array.' });
     }
 
-    if (!sheetId) {
-        console.error("sheetId is not defined.");
-        return res.status(400).json({ error: 'sheetId is not defined.' });
-    }
-
     try {
         const accessToken = await refreshAccessToken();
 
@@ -220,7 +215,7 @@ app.post('/api/write-data', async (req, res) => {
                     {
                         updateCells: {
                             range: {
-                                sheetId: parseInt(sheetId), // Użyj zmiennej środowiskowej sheetId
+                                sheetId: sheetId, // Użyj zmiennej środowiskowej sheetId
                                 startRowIndex: 1,
                                 endRowIndex: 1000 // Zastąp liczbą odpowiednią do zakresu, który chcesz wyczyścić
                             },
@@ -255,9 +250,6 @@ app.post('/api/write-data', async (req, res) => {
         res.status(500).json({ error: 'Error writing data.' });
     }
 });
-
-
-
 
 
 
