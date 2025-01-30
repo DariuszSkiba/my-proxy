@@ -166,7 +166,13 @@ app.post('/api/write-data', async (req, res) => {
     const { values } = req.body;
     const spreadsheetId = process.env.SPREADSHEET_ID;
     const sheetId = parseInt(process.env.SHEETID_PRODUCTS, 10); // Upewnij się, że to jest liczba całkowita
+
     console.log('Sheet ID:', sheetId);
+
+    if (isNaN(sheetId)) {
+        console.error("Invalid sheetId. Please check your environment variables.");
+        return res.status(500).json({ error: 'Invalid sheetId. Please check your environment variables.' });
+    }
 
     if (!values || !Array.isArray(values)) {
         console.error("Invalid data format. Expected an array.");
@@ -251,6 +257,14 @@ app.post('/api/write-data', async (req, res) => {
         res.status(500).json({ error: 'Error writing data.' });
     }
 });
+
+app.listen(3000, () => {
+    console.log('Server is running on port 3000');
+});
+
+const refreshAccessToken = async () => {
+    // Implementacja funkcji odświeżania tokena
+};
 
 
 
