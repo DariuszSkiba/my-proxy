@@ -325,11 +325,12 @@ app.post('/api/write-schedule', async (req, res) => {
         console.log('Existing Headers Response:', existingHeadersResponse.data);
 
         let dataToSend = [];
-        if (!existingHeadersResponse.data.values || existingHeadersResponse.data.values[0].join() !== headers.join()) {
-            dataToSend.push(headers);
+        if (existingHeadersResponse.data.values && existingHeadersResponse.data.values.length > 0) {
+            // Jeśli nagłówki już istnieją, nie dodawaj ich ponownie
+            dataToSend = values;
+        } else {
+            dataToSend = [headers, ...values];
         }
-
-        dataToSend = dataToSend.concat(values);
         console.log('Data to Send:', dataToSend);
 
         // Wyczyść istniejące dane w arkuszu
@@ -375,6 +376,7 @@ app.post('/api/write-schedule', async (req, res) => {
         res.status(500).json({ error: 'Error writing data.' });
     }
 });
+
 
 
 
