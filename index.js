@@ -296,6 +296,8 @@ app.post('/api/write-schedule', async (req, res) => {
     const spreadsheetId = process.env.SPREADSHEET_ID_SCHEDULE;
     const sheetId = parseInt(process.env.SHEETID_SCHEDULE, 10);
 
+    console.log('Sheet ID:', sheetId);
+
     if (isNaN(sheetId)) {
         return res.status(500).json({ error: 'Invalid sheetId. Please check your environment variables.' });
     }
@@ -306,6 +308,8 @@ app.post('/api/write-schedule', async (req, res) => {
 
     try {
         const accessToken = await refreshAccessToken();
+        console.log('Access Token:', accessToken);
+
         const headers = ["Lp", "Name", "Surname", "Title", "Birthdate", "Email", "Mobile_Phone"];
         const existingHeadersResponse = await axios.get(
             `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/scheduler!A1:G1`,
@@ -316,13 +320,25 @@ app.post('/api/write-schedule', async (req, res) => {
                 }
             }
         );
+        console.log('Existing Headers Response:', existingHeadersResponse.data);
 
-        let dataToSend = values;
-
-        if (!existingHeadersResponse.data.values || existingHeadersResponse.data.values.length === 0) {
-            dataToSend = [headers, ...values];
+        let dataToSend = [];
+        if (!existingHeadersResponse.data.values || existingHeadersResponse.data.values[0].join() !== headers.join()) {
+            dataToSend.push(headers);
         }
 
+        dataToSend = dataToSend.concat(values.map((row, index) => [
+            index + 1,
+            row[1],
+            row[2],
+            row[3],
+            row[4],
+            row[5],
+            row[6]
+        ]));
+        console.log('Data to Send:', dataToSend);
+
+        // Wyczyść istniejące dane w arkuszu
         await axios.post(
             `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}:batchUpdate`,
             {
@@ -347,6 +363,7 @@ app.post('/api/write-schedule', async (req, res) => {
             }
         );
 
+        // Zapisz nowe dane do arkusza
         const response = await axios.put(
             `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/scheduler!A2:G?valueInputOption=USER_ENTERED`,
             { values: dataToSend },
@@ -360,9 +377,11 @@ app.post('/api/write-schedule', async (req, res) => {
 
         res.status(200).json({ message: 'Data updated successfully!', response: response.data });
     } catch (error) {
+        console.error('Error writing data:', error.response ? error.response.data : error.message);
         res.status(500).json({ error: 'Error writing data.' });
     }
 });
+
 
 
 
