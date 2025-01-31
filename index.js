@@ -312,7 +312,7 @@ app.post('/api/write-schedule', async (req, res) => {
         const accessToken = await refreshAccessToken();
         console.log('Access Token:', accessToken);
 
-        const headers = ["Lp", "Name", "Surname", "Title", "Birthdate", "Email", "Mobile_Phone", "Data_Schedule", "Refused", "Last_Data_Schedule"];
+        const headers = ["Lp", "Name", "Surname", "Title", "Birthdate", "Email", "Mobile_Phone"];
         const existingHeadersResponse = await axios.get(
             `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/scheduler!A1:G1`, // Pobieranie tylko kolumn od A do G
             {
@@ -329,15 +329,7 @@ app.post('/api/write-schedule', async (req, res) => {
             dataToSend.push(headers);
         }
 
-        dataToSend = dataToSend.concat(values.map((row, index) => [
-            index + 1,
-            row[1],
-            row[2],
-            row[3],
-            row[4],
-            row[5],
-            row[6]
-        ]));
+        dataToSend = dataToSend.concat(values);
         console.log('Data to Send:', dataToSend);
 
         // Wyczyść istniejące dane w arkuszu
@@ -383,6 +375,7 @@ app.post('/api/write-schedule', async (req, res) => {
         res.status(500).json({ error: 'Error writing data.' });
     }
 });
+
 
 
 
