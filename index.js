@@ -322,12 +322,7 @@ app.post('/api/write-schedule', async (req, res) => {
         );
         console.log('Existing Headers Response:', existingHeadersResponse.data);
 
-        let dataToSend = [];
-        if (!existingHeadersResponse.data.values || existingHeadersResponse.data.values[0].join() !== headers.join()) {
-            dataToSend.push(headers);
-        }
-
-        dataToSend = dataToSend.concat(values.map((row, index) => [
+        let dataToSend = [headers].concat(values.map((row, index) => [
             index + 1,
             row[1],
             row[2],
@@ -347,7 +342,7 @@ app.post('/api/write-schedule', async (req, res) => {
                         updateCells: {
                             range: {
                                 sheetId: sheetId,
-                                startRowIndex: 1,
+                                startRowIndex: 0,
                                 endRowIndex: 1000
                             },
                             fields: "userEnteredValue"
@@ -363,9 +358,9 @@ app.post('/api/write-schedule', async (req, res) => {
             }
         );
 
-        // Zapisz nowe dane do arkusza
+        // Zapisz nowe dane do arkusza, zaczynając od wiersza 1
         const response = await axios.put(
-            `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/scheduler!A2:G?valueInputOption=USER_ENTERED`,
+            `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/scheduler!A1:G?valueInputOption=USER_ENTERED`,
             { values: dataToSend },
             {
                 headers: {
@@ -381,8 +376,6 @@ app.post('/api/write-schedule', async (req, res) => {
         res.status(500).json({ error: 'Error writing data.' });
     }
 });
-
-
 
 
 
