@@ -310,8 +310,8 @@ app.post('/api/write-schedule', async (req, res) => {
         const accessToken = await refreshAccessToken();
         console.log('Access Token:', accessToken);
 
-        const headers = ["Lp", "Name", "Surname", "Title", "Birthdate", "Email", "Mobile_Phone"];
-        const existingHeadersResponse = await axios.get(
+        // Pobierz istniejące nagłówki
+        const headersResponse = await axios.get(
             `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/scheduler!A1:G1`,
             {
                 headers: {
@@ -320,9 +320,11 @@ app.post('/api/write-schedule', async (req, res) => {
                 }
             }
         );
-        console.log('Existing Headers Response:', existingHeadersResponse.data);
+        const existingHeaders = headersResponse.data.values[0];
+        console.log('Existing Headers:', existingHeaders);
 
-        let dataToSend = [headers].concat(values.map((row, index) => [
+        // Zbuduj dane do wysłania bez dodawania ponownie nagłówków
+        let dataToSend = values.map((row, index) => [
             index + 1,
             row[1],
             row[2],
@@ -330,7 +332,7 @@ app.post('/api/write-schedule', async (req, res) => {
             row[4],
             row[5],
             row[6]
-        ]));
+        ]);
         console.log('Data to Send:', dataToSend);
 
         // Wyczyść istniejące dane w arkuszu
@@ -342,7 +344,7 @@ app.post('/api/write-schedule', async (req, res) => {
                         updateCells: {
                             range: {
                                 sheetId: sheetId,
-                                startRowIndex: 0,
+                                startRowIndex: 1,
                                 endRowIndex: 1000
                             },
                             fields: "userEnteredValue"
@@ -358,9 +360,9 @@ app.post('/api/write-schedule', async (req, res) => {
             }
         );
 
-        // Zapisz nowe dane do arkusza, zaczynając od wiersza 1
+        // Zapisz nowe dane do arkusza, zaczynając od wiersza 2 (pomijając nagłówki)
         const response = await axios.put(
-            `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/scheduler!A1:G?valueInputOption=USER_ENTERED`,
+            `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/scheduler!A2:G?valueInputOption=USER_ENTERED`,
             { values: dataToSend },
             {
                 headers: {
@@ -376,6 +378,7 @@ app.post('/api/write-schedule', async (req, res) => {
         res.status(500).json({ error: 'Error writing data.' });
     }
 });
+
 
 
 
