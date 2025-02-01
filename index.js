@@ -323,19 +323,7 @@ app.post('/api/write-schedule', async (req, res) => {
         const existingHeaders = headersResponse.data.values[0];
         console.log('Existing Headers:', existingHeaders);
 
-        // Zbuduj dane do wysłania bez dodawania ponownie nagłówków
-        let dataToSend = values.map((row, index) => [
-            index + 1,
-            row[1],
-            row[2],
-            row[3],
-            row[4],
-            row[5],
-            row[6]
-        ]);
-        console.log('Data to Send:', dataToSend);
-
-        // Wyczyść istniejące dane w arkuszu
+        // Usuń istniejące dane w arkuszu (oprócz nagłówków)
         await axios.post(
             `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}:batchUpdate`,
             {
@@ -344,8 +332,8 @@ app.post('/api/write-schedule', async (req, res) => {
                         updateCells: {
                             range: {
                                 sheetId: sheetId,
-                                startRowIndex: 1,
-                                endRowIndex: 1000
+                                startRowIndex: 1, // Zaczynamy od wiersza 1, aby zachować nagłówek
+                                endRowIndex: 1000 // Zasięg do wyczyszczenia danych
                             },
                             fields: "userEnteredValue"
                         }
@@ -363,7 +351,7 @@ app.post('/api/write-schedule', async (req, res) => {
         // Zapisz nowe dane do arkusza, zaczynając od wiersza 2 (pomijając nagłówki)
         const response = await axios.put(
             `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/scheduler!A2:G?valueInputOption=USER_ENTERED`,
-            { values: dataToSend },
+            { values: values.slice(1) }, // Pominiecie pierwszego wiersza (nagłówka) z danych
             {
                 headers: {
                     'Authorization': `Bearer ${accessToken}`,
@@ -378,6 +366,7 @@ app.post('/api/write-schedule', async (req, res) => {
         res.status(500).json({ error: 'Error writing data.' });
     }
 });
+
 
 
 
