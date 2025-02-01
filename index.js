@@ -86,6 +86,7 @@ async function refreshAccessToken() {
     }
 }
 
+// Funkcja do odczytania danych z arkusza products
 app.get('/api/read-data', async (req, res) => {
     try {
         const accessToken = await refreshAccessToken();
@@ -112,7 +113,7 @@ app.get('/api/read-data', async (req, res) => {
 });
 
 
-// Endpoint do przesyłania danych do Google Sheets
+// Endpoint do przesyłania danych do Google Sheets products
 app.post('/api/submit-data', async (req, res) => {
     const rawData = req.body;
     console.log("Received full request body:", JSON.stringify(rawData, null, 2)); // Logowanie całego żądania
@@ -162,7 +163,7 @@ app.post('/api/submit-data', async (req, res) => {
 });
 
 
-// Obsługa zapisu danych
+// Obsługa zapisu danych do arkusza products
 app.post('/api/write-data', async (req, res) => {
     const { values } = req.body;
     const spreadsheetId = process.env.SPREADSHEET_ID;
@@ -259,11 +260,14 @@ app.post('/api/write-data', async (req, res) => {
     }
 });
 
+
+//Nasłuch serwera na porcie 3000
 app.listen(3000, () => {
     console.log('Server is running on port 3000');
 });
 
 
+// Funkcja do odczytania danych z arkusza scheduler
 app.get('/api/read-schedule', async (req, res) => {
     try {
         const accessToken = await refreshAccessToken();
@@ -369,10 +373,6 @@ app.post('/api/write-schedule', async (req, res) => {
 
 
 
-
-
-
-
 // Proxy dla /greenroom
 app.use('/greenroom', async (req, res) => {
     try {
@@ -411,7 +411,8 @@ app.use('/greenroom', async (req, res) => {
 const NodeCache = require('node-cache');
 const cache = new NodeCache({ stdTTL: 3600 }); // 1 hour TTL
 
-// Endpoint do uzyskiwania informacji o produkcie
+
+// Endpoint do uzyskiwania informacji o produkcie po kodzie kreskowym
 app.get('/api/:barcode', async (req, res) => {
     try {
         const { barcode } = req.params;
@@ -440,6 +441,7 @@ app.get('/api/:barcode', async (req, res) => {
     }
 });
 
+
 // Endpoint do przetwarzania raportów CSP
 app.post('/csp-report', express.json({ type: 'application/csp-report' }), (req, res) => {
     const report = req.body;
@@ -459,6 +461,7 @@ app.post('/csp-report', express.json({ type: 'application/csp-report' }), (req, 
         res.status(400).json({ error: 'Error sending CSP Report' });
     });
 });
+
 
 // Endpoint do sprawdzania zdrowia serwera
 app.get('/health', (req, res) => {
