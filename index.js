@@ -60,6 +60,17 @@ app.use('/greenroom', async (req, res) => {
     }
 });
 
+
+// Endpoint to fetch environment variables
+app.get('/api/env', (req, res) => {
+    res.json({
+        sheetIdSchedule: process.env.SHEETID_SCHEDULE,
+        spreadsheetIdSchedule: process.env.SPREADSHEET_ID_SCHEDULE,
+    });
+});
+
+
+
 // Endpoint do przekierowania OAuth
 app.get('/api/auth', (req, res) => {
     const code = req.query.code;
