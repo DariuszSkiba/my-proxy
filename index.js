@@ -4,6 +4,7 @@ const express = require('express');
 const axios = require('axios');
 const app = express();
 const cors = require('cors');
+const crypto = require('crypto');
 
 
 const corsOptions = {
@@ -471,6 +472,51 @@ app.post('/csp-report', express.json({ type: 'application/csp-report' }), (req, 
         console.error('Error sending CSP Report:', error);
         res.status(400).json({ error: 'Error sending CSP Report' });
     });
+});
+
+
+// Example function to hash data using SHA-256
+function hashData(data) {
+    return crypto.createHash('sha256').update(data).digest('hex');
+}
+
+// Endpoint to fetch environment variables
+app.get('/api/env', (req, res) => {
+    res.json({
+        sheetIdSchedule: process.env.SHEETID_SCHEDULE,
+        spreadsheetIdSchedule: process.env.SPREADSHEET_ID_SCHEDULE,
+    });
+});
+
+
+// Example endpoint for authentication
+app.post('/api/authenticate', (req, res) => {
+    const { email, surname, dob } = req.body;
+
+    // Hash the incoming data
+    const hashedEmail = hashData(email.trim());
+    const hashedSurname = hashData(surname.trim());
+    const hashedDob = hashData(dob.trim());
+
+    // Fetch the users from Google Sheets and compare the hashes (this is a pseudo-code example)
+    // Replace this with actual logic to fetch and compare data from Google Sheets
+    const users = fetchUsersFromGoogleSheets(); // Assume this function returns a list of users from Google Sheets
+
+    const userFound = users.some(user => {
+        const userHashedEmail = hashData(user.Email.trim());
+        const userHashedSurname = hashData(user.Surname.trim());
+        const userHashedDob = hashData(user.Birthdate.trim());
+
+        return userHashedEmail === hashedEmail &&
+               userHashedSurname === hashedSurname &&
+               userHashedDob === hashedDob;
+    });
+
+    if (userFound) {
+        res.json({ success: true, message: 'User authenticated successfully!' });
+    } else {
+        res.json({ success: false, message: 'Invalid credentials!' });
+    }
 });
 
 
