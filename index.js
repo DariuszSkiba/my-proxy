@@ -283,8 +283,12 @@ app.listen(3000, () => {
 app.get('/api/read-schedulerandom', async (req, res) => {
     try {
         const accessToken = await refreshAccessToken();
+        console.log('Access Token:', accessToken); // Logowanie tokena
+        const spreadsheetId = process.env.SPREADSHEET_ID_SCHEDULE;
+        console.log('Spreadsheet ID:', spreadsheetId); // Logowanie ID arkusza
+
         const response = await axios.get(
-            `https://sheets.googleapis.com/v4/spreadsheets/${process.env.SPREADSHEET_ID_SCHEDULE}/values/scheduler!A:J`,
+            `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/scheduler!A:J`,
             {
                 headers: {
                     'Authorization': `Bearer ${accessToken}`,
@@ -294,9 +298,11 @@ app.get('/api/read-schedulerandom', async (req, res) => {
         );
         res.status(200).json(response.data);
     } catch (error) {
+        console.error('Error reading data:', error.response ? error.response.data : error.message);
         res.status(500).json({ error: 'Error reading data.' });
     }
 });
+
 
 
 
