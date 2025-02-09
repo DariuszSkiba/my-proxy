@@ -306,7 +306,7 @@ app.listen(3000, () => {
 });
 
 
-// Funkcja do odczytania danych z arkusza scheduler bez logowania
+// Funkcja do odczytu danych z arkusza scheduler wylosowanych
 app.get('/api/read-schedulerandom', async (req, res) => {
     try {
         const accessToken = await getAccessToken();
@@ -319,16 +319,14 @@ app.get('/api/read-schedulerandom', async (req, res) => {
                 }
             }
         );
+        console.log('Response data:', response.data); // Logowanie odpowiedzi
         res.status(200).json(response.data);
     } catch (error) {
         console.error('Error reading data:', error.response ? error.response.data : error.message);
-        if (error.response && error.response.status === 403) {
-            res.status(403).json({ error: 'Access to the resource is forbidden.' });
-        } else {
-            res.status(500).json({ error: 'Error reading data.' });
-        }
+        res.status(500).json({ error: 'Error reading data.' });
     }
 });
+
 
 
 
