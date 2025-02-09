@@ -307,7 +307,7 @@ app.listen(3000, () => {
 
 
 // Funkcja do odczytu danych z arkusza scheduler wylosowanych
-app.get('/api/read-schedulerandom', async (req, res) => {
+app.get('/api/readschedulerandom', async (req, res) => {
     try {
         const accessToken = await getAccessToken();
         const response = await axios.get(
