@@ -279,6 +279,27 @@ app.listen(3000, () => {
 });
 
 
+//Funkcja do odczytu danych z arkusza scheduler wylosowanych
+app.get('/api/read-schedule-random', async (req, res) => {
+    try {
+        const accessToken = await refreshAccessToken();
+        const response = await axios.get(
+            `https://sheets.googleapis.com/v4/spreadsheets/${process.env.SPREADSHEET_ID_SCHEDULE}/values/scheduler!A:J`,
+            {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json'
+                }
+            }
+        );
+        res.status(200).json(response.data);
+    } catch (error) {
+        res.status(500).json({ error: 'Error reading data.' });
+    }
+});
+
+
+
 // Funkcja do odczytania danych z arkusza scheduler
 app.get('/api/read-schedule', async (req, res) => {
     try {
