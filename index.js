@@ -5,6 +5,7 @@ const axios = require('axios');
 const app = express();
 const cors = require('cors');
 const crypto = require('crypto');
+const jwt = require('jsonwebtoken');
 
 
 const corsOptions = {
@@ -96,6 +97,32 @@ async function refreshAccessToken() {
         console.error('Error refreshing access token:', error.response ? error.response.data : error.message);
         throw new Error('Failed to refresh access token');
     }
+}
+
+// Funkcja do sprawdzania, czy token wygasł
+function isTokenExpired(token) {
+    if (!token) return true; // Jeśli token nie istnieje, zwróć true
+
+    // Dekodowanie tokenu bez weryfikacji, aby uzyskać datę wygaśnięcia
+    const decodedToken = jwt.decode(token, { complete: true });
+
+    if (!decodedToken || !decodedToken.payload || !decodedToken.payload.exp) {
+        return true; // Jeśli nie uda się zdekodować tokenu lub brakuje daty wygaśnięcia, zwróć true
+    }
+
+    const currentTime = Math.floor(Date.now() / 1000); // Bieżący czas w sekundach od epoki
+    return decodedToken.payload.exp < currentTime; // Zwróć true, jeśli token wygasł
+}
+
+// Funkcja do pobrania tokenu dostępu
+async function getAccessToken() {
+    let accessToken = process.env.ACCESS_TOKEN;
+    if (isTokenExpired(accessToken)) {
+        accessToken = await refreshAccessToken();
+        // Ustawienie nowego tokenu dostępu
+        process.env.ACCESS_TOKEN = accessToken;
+    }
+    return accessToken;
 }
 
 // Funkcja do odczytania danych z arkusza products
@@ -279,13 +306,12 @@ app.listen(3000, () => {
 });
 
 
-//Funkcja do odczytu danych z arkusza scheduler wylosowanych
+// Funkcja do odczytania danych z arkusza scheduler bez logowania
 app.get('/api/read-schedulerandom', async (req, res) => {
     try {
-        const accessToken = await refreshAccessToken();
-        console.log('Access Token:', accessToken); // Logowanie tokena
+        const accessToken = await getAccessToken();
         const response = await axios.get(
-            `https://sheets.googleapis.com/v4/spreadsheets/${process.env.SPREADSHEET_ID_SCHEDULE}/values/scheduler!A:J`, // Zmiana pliku i zakładki
+            `https://sheets.googleapis.com/v4/spreadsheets/${process.env.SPREADSHEET_ID_SCHEDULE}/values/scheduler!A:J`,
             {
                 headers: {
                     'Authorization': `Bearer ${accessToken}`,
@@ -293,7 +319,6 @@ app.get('/api/read-schedulerandom', async (req, res) => {
                 }
             }
         );
-        console.log('Response data:', response.data); // Logowanie odpowiedzi
         res.status(200).json(response.data);
     } catch (error) {
         console.error('Error reading data:', error.response ? error.response.data : error.message);
@@ -304,9 +329,6 @@ app.get('/api/read-schedulerandom', async (req, res) => {
         }
     }
 });
-
-
-
 
 
 
