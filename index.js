@@ -306,6 +306,7 @@ app.get('/api/read-schedulerandom', async (req, res) => {
 
 
 
+
 // Funkcja do odczytania danych z arkusza scheduler
 app.get('/api/read-schedule', async (req, res) => {
     try {
