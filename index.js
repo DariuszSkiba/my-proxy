@@ -280,7 +280,7 @@ app.listen(3000, () => {
 
 
 //Funkcja do odczytu danych z arkusza scheduler wylosowanych
-app.get('/api/read-schedule-random', async (req, res) => {
+app.get('/api/read-schedulerandom', async (req, res) => {
     try {
         const accessToken = await refreshAccessToken();
         const response = await axios.get(
